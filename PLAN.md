@@ -207,8 +207,8 @@ If you'd rather have a dedicated object than a random card:
 - **Accessibility can always be turned off from Safe Mode.** Only Device Owner
   (tier C) fully prevents this. Document it honestly.
 - **Play Store policy** on accessibility means sideloading first.
-- **Open questions:**
-  1. Should one key unlock every mode, or should keys be bound to specific modes?
-  2. How many emergency unbricks, and do they refill (monthly or never)?
-  3. Is website blocking (VPN) in scope for v1?
-  4. Is a strict Device Owner mode wanted, given it needs a one-time `adb` setup?
+- **Decisions (v1 defaults):**
+  1. One key unlocks every mode. Keys are not tied to specific modes.
+  2. 5 emergency unbricks, which never refill.
+  3. Website blocking (VPN) is out of scope for v1.
+  4. Strict Device Owner mode is deferred to v2.
