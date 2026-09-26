@@ -1,9 +1,12 @@
 package com.diybrick.feature.blocker
 
 import android.accessibilityservice.AccessibilityService
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
+import androidx.core.os.HandlerCompat
 import com.diybrick.core.data.BrickData
 import com.diybrick.core.model.BlockPolicy
 import com.diybrick.core.model.BrickState
@@ -28,8 +31,10 @@ class BlockerService : AccessibilityService() {
     private var mode: Mode? = null
     private var exempt: Set<String> = EssentialApps.KNOWN.keys
 
-    private var lastBlockedPackage: String? = null
-    private var lastBlockedAt = 0L
+    /** The app most recently seen coming to the foreground. */
+    private var foregroundPackage: String? = null
+    private val messages = MessageThrottle(clock = SystemClock::elapsedRealtime)
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onServiceConnected() {
         exempt = ExemptApps.load(this).keys
@@ -48,31 +53,48 @@ class BlockerService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val packageName = event.packageName?.toString() ?: return
+        foregroundPackage = packageName
+        blockIfNeeded(packageName)
+    }
+
+    /** Every launch of a blocked app is closed, however quickly it's reopened. */
+    private fun blockIfNeeded(packageName: String) {
         val mode = mode ?: return
         val bricked = state as? BrickState.Bricked ?: return
         if (!BlockPolicy.shouldBlock(packageName, bricked, mode, exempt)) return
 
-        // One app can fire several window events in a burst; block it once.
-        val now = SystemClock.elapsedRealtime()
-        if (packageName == lastBlockedPackage && now - lastBlockedAt < DEBOUNCE_MS) return
-        lastBlockedPackage = packageName
-        lastBlockedAt = now
-
         performGlobalAction(GLOBAL_ACTION_HOME)
         startActivity(BlockedActivity.intent(this, packageName, mode.listType, bricked.since))
-        // Some phones stop background services from opening screens; the toast still explains.
-        val label = AppLabels.of(this, packageName)
-        Toast.makeText(this, "DIY Brick closed $label: your phone is bricked", Toast.LENGTH_LONG).show()
+        if (messages.shouldShow(packageName)) {
+            // Some phones stop background services from opening screens; the toast still explains.
+            val label = AppLabels.of(this, packageName)
+            Toast.makeText(this, "DIY Brick closed $label: your phone is bricked", Toast.LENGTH_LONG).show()
+        }
+
+        // If the app somehow ends up in front again without a new window event
+        // (e.g. a fast relaunch racing the Home action), close it again. Replacing any
+        // pending re-checks keeps at most a couple queued.
+        handler.removeCallbacksAndMessages(RECHECK_TOKEN)
+        RECHECK_DELAYS_MS.forEach { delay ->
+            HandlerCompat.postDelayed(
+                handler,
+                { if (foregroundPackage == packageName) blockIfNeeded(packageName) },
+                RECHECK_TOKEN,
+                delay,
+            )
+        }
     }
 
     override fun onInterrupt() = Unit
 
     override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
         scope.cancel()
         super.onDestroy()
     }
 
     private companion object {
-        const val DEBOUNCE_MS = 1_000L
+        val RECHECK_DELAYS_MS = listOf(500L, 1_500L)
+        val RECHECK_TOKEN = Any()
     }
 }
