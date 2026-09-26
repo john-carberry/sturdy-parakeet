@@ -39,9 +39,15 @@ android {
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:security"))
+    implementation(project(":core:data"))
+    implementation(project(":feature:nfc"))
+    implementation(project(":feature:qr"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

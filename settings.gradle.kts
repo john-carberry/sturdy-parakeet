@@ -19,3 +19,6 @@ rootProject.name = "diy-brick"
 include(":app")
 include(":core:model")
 include(":core:security")
+include(":core:data")
+include(":feature:nfc")
+include(":feature:qr")
