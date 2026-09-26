@@ -53,8 +53,9 @@ guard matches English button text.
 
 ## Releases
 
-Pushing a tag like `v0.5.0` runs `.github/workflows/release.yml`, which tests, builds
-signed APKs and publishes them on GitHub Releases. The signing key is never in the
+`.github/workflows/release.yml` tests, builds signed APKs and publishes them on GitHub
+Releases. Start it from the Actions tab (Release › Run workflow), which releases the
+`versionName` in `app/build.gradle.kts` and creates its `v…` tag, or by pushing a tag. The signing key is never in the
 repository; the workflow reads it from four repository secrets
 (Settings › Secrets and variables › Actions):
 
