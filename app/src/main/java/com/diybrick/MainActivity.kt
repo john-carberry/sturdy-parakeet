@@ -14,7 +14,7 @@ import com.diybrick.feature.nfc.NfcReader
 import com.diybrick.feature.nfc.NfcTagDispatcher
 import com.diybrick.feature.service.BrickService
 import com.diybrick.ui.DiyBrickNavHost
-import com.diybrick.ui.theme.DiyBrickTheme
+import com.diybrick.core.ui.DiyBrickTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {

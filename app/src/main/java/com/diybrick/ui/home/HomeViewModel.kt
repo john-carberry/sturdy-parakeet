@@ -7,11 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diybrick.core.data.BrickRepository
 import com.diybrick.core.data.KeyRepository
+import com.diybrick.core.data.ModeRepository
 import com.diybrick.core.model.BrickRules.DenyReason
 import com.diybrick.core.model.BrickRules.Outcome
 import com.diybrick.core.model.BrickState
 import com.diybrick.core.model.Key
 import com.diybrick.core.model.KeyType
+import com.diybrick.core.model.Mode
 import com.diybrick.core.security.NfcUidPolicy
 import com.diybrick.core.security.QrKeyPayload
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +28,7 @@ data class Notice(val text: String, val isError: Boolean = false)
 class HomeViewModel(
     private val keys: KeyRepository,
     private val brick: BrickRepository,
+    modes: ModeRepository,
 ) : ViewModel() {
 
     /** Brick state, or null while loading. */
@@ -33,6 +36,10 @@ class HomeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val emergencyUnbricksRemaining: StateFlow<Int?> = brick.emergencyUnbricksRemaining
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** The apps to block, or null while loading. */
+    val mode: StateFlow<Mode?> = modes.observe()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Number of paired keys, or null while loading. */

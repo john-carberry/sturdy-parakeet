@@ -37,6 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.diybrick.core.model.BrickState
+import com.diybrick.core.model.ListType
+import com.diybrick.core.model.Mode
+import com.diybrick.feature.blocker.rememberBlockerEnabled
 import com.diybrick.feature.nfc.NfcStatus
 import com.diybrick.feature.nfc.OnNfcTag
 import com.diybrick.feature.nfc.rememberNfcStatus
@@ -52,10 +55,14 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onScanQr: () -> Unit,
     onManageKeys: () -> Unit,
+    onChooseApps: () -> Unit,
+    onSetUpBlocker: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val keyCount by viewModel.keyCount.collectAsStateWithLifecycle()
     val emergencyLeft by viewModel.emergencyUnbricksRemaining.collectAsStateWithLifecycle()
+    val mode by viewModel.mode.collectAsStateWithLifecycle()
+    val blockerEnabled = rememberBlockerEnabled()
     val nfcStatus = rememberNfcStatus()
     val context = LocalContext.current
     var confirmEmergency by remember { mutableStateOf(false) }
@@ -74,8 +81,9 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            state?.let { StatusCard(it) }
+            state?.let { StatusCard(it, mode) }
             viewModel.notice?.let { NoticeCard(it) }
+            if (!blockerEnabled) BlockerOffCard(onSetUpBlocker)
 
             when (keyCount) {
                 null -> Unit
@@ -102,6 +110,9 @@ fun HomeScreen(
                     }
                     Button(onClick = onScanQr, modifier = Modifier.fillMaxWidth()) {
                         Text("Scan QR key to $action")
+                    }
+                    OutlinedButton(onClick = onChooseApps, modifier = Modifier.fillMaxWidth()) {
+                        Text("Choose apps to block")
                     }
                     OutlinedButton(onClick = onManageKeys, modifier = Modifier.fillMaxWidth()) {
                         Text("Manage keys")
@@ -130,7 +141,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun StatusCard(state: BrickState) {
+private fun StatusCard(state: BrickState, mode: Mode?) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(24.dp)) {
             when (state) {
@@ -142,12 +153,32 @@ private fun StatusCard(state: BrickState) {
                     val since = DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(state.since))
                     Text("🧱 Bricked", style = MaterialTheme.typography.headlineLarge)
                     Text("Since $since", style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        "App blocking arrives in the next update.",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
                 }
             }
+            mode?.let { Text(summary(it), style = MaterialTheme.typography.bodySmall) }
+        }
+    }
+}
+
+private fun summary(mode: Mode): String {
+    val n = mode.packages.size
+    val apps = "$n app${if (n == 1) "" else "s"}"
+    return when (mode.listType) {
+        ListType.BLOCK -> if (n == 0) "No apps chosen to block yet." else "Blocks $apps."
+        ListType.ALLOW -> "Blocks everything except $apps, calls, the keyboard and Settings."
+    }
+}
+
+@Composable
+private fun BlockerOffCard(onSetUp: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("App blocking is off", style = MaterialTheme.typography.titleMedium)
+            Text("Bricking won't block anything until you turn it on.")
+            Button(onClick = onSetUp) { Text("Turn on") }
         }
     }
 }

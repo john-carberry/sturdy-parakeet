@@ -1,0 +1,4 @@
+<resources>
+    <string name="blocker_service_label">DIY Brick app blocker</string>
+    <string name="blocker_service_description">Blocks the apps you chose while your phone is bricked. It only sees which app is opening, never what is on the screen, and nothing leaves your phone.</string>
+</resources>

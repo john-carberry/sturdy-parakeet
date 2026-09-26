@@ -1,4 +1,4 @@
-package com.diybrick.ui.theme
+package com.diybrick.core.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

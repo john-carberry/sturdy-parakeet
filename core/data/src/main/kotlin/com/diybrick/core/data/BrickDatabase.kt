@@ -7,13 +7,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [KeyEntity::class, SessionEntity::class],
-    version = 2,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    entities = [KeyEntity::class, SessionEntity::class, ModeEntity::class, ModeAppEntity::class],
+    version = 3,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
+    ],
 )
 internal abstract class BrickDatabase : RoomDatabase() {
     abstract fun keyDao(): KeyDao
     abstract fun sessionDao(): SessionDao
+    abstract fun modeDao(): ModeDao
 
     companion object {
         fun create(context: Context): BrickDatabase =

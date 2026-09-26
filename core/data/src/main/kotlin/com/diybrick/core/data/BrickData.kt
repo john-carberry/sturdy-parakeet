@@ -10,11 +10,15 @@ class BrickData private constructor(context: Context) {
 
     val brick = BrickRepository(database.sessionDao())
 
+    private val isBricked: suspend () -> Boolean = { brick.currentState() is BrickState.Bricked }
+
     val keys = KeyRepository(
         dao = database.keyDao(),
         hasher = KeyHasher(SaltStore.getOrCreate(context)),
-        isLocked = { brick.currentState() is BrickState.Bricked },
+        isLocked = isBricked,
     )
+
+    val modes = ModeRepository(database.modeDao(), isLocked = isBricked)
 
     companion object {
         @Volatile
