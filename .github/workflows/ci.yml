@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: No keys or personal files committed
+        run: scripts/check-no-secrets.sh
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

@@ -51,6 +51,18 @@ Settings › Security › Device admin apps, then uninstall as usual.
 Known limits: Safe Mode disables third-party accessibility services, and the Settings
 guard matches English button text.
 
+## Privacy: where your keys live
+
+- Card IDs and QR secrets never leave your phone. The app stores only a salted
+  SHA-256 hash of each one, in its private database, and excludes that data from
+  cloud backups and phone-to-phone transfers.
+- A QR key's secret exists only on the printout (and briefly on screen, where
+  screenshots are blocked). Treat the printout, or a PDF of it, like a house key.
+- Nothing in this repository holds a real key. `scripts/check-no-secrets.sh` runs
+  in CI and fails if a commit contains an app build, a database, a keystore, a PDF,
+  the local-only `app/src/debug/res/` folder, or a QR key secret. Run it before
+  every commit with a one-time `git config core.hooksPath .githooks`.
+
 ## Status
 
 - [x] M0 — project skeleton, CI

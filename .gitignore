@@ -9,3 +9,16 @@ captures/
 
 # Local-only resource overrides for personal debug builds (never committed).
 app/src/debug/res/
+
+# Never commit anything that could hold a key or personal data.
+*.apk
+*.aab
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.jks
+*.keystore
+*.p12
+keystore.properties
+*.pdf
