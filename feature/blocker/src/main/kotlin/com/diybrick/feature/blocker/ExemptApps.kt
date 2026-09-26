@@ -1,41 +1,54 @@
 package com.diybrick.feature.blocker
 
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.provider.AlarmClock
+import android.provider.ContactsContract
+import android.provider.Telephony
 import android.telecom.TelecomManager
+import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.InputMethodManager
+import com.diybrick.core.model.EssentialApps
+import com.diybrick.core.model.EssentialReason
 
 /**
- * Apps that are never blocked, even in allow-list mode, so the phone stays usable
- * and you can always get back to DIY Brick to unbrick.
+ * Apps that are never blocked, even in allow-list mode, so the phone keeps working
+ * and you can always get back to DIY Brick to unbrick. Combines the well-known list
+ * with this phone's actual defaults.
  */
 object ExemptApps {
-    private val ALWAYS = setOf(
-        "android",
-        "com.android.systemui",
-        "com.android.settings",
-        "com.android.phone",
-        "com.android.emergency",
-        "com.android.server.telecom",
-        "com.google.android.permissioncontroller",
-        "com.android.permissioncontroller",
-    )
 
-    fun load(context: Context): Set<String> = buildSet {
-        addAll(ALWAYS)
-        add(context.packageName)
-        addAll(launchers(context))
-        context.getSystemService(TelecomManager::class.java)?.defaultDialerPackage?.let(::add)
-        context.getSystemService(InputMethodManager::class.java)
-            ?.enabledInputMethodList
-            ?.forEach { add(it.packageName) }
+    fun load(context: Context): Map<String, EssentialReason> {
+        val result = linkedMapOf(context.packageName to EssentialReason.THIS_APP)
+        fun add(packageName: String?, reason: EssentialReason) {
+            if (!packageName.isNullOrEmpty()) result.putIfAbsent(packageName, reason)
+        }
+        val pm = context.packageManager
+
+        context.getSystemService(TelecomManager::class.java)?.defaultDialerPackage
+            ?.let { add(it, EssentialReason.PHONE) }
+        add(Telephony.Sms.getDefaultSmsPackage(context), EssentialReason.MESSAGES)
+        packagesFor(pm, Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME))
+            .forEach { add(it, EssentialReason.HOME_SCREEN) }
+        packagesFor(pm, Intent(AlarmClock.ACTION_SHOW_ALARMS))
+            .forEach { add(it, EssentialReason.ALARMS) }
+        context.getSystemService(AlarmManager::class.java)?.nextAlarmClock?.showIntent?.creatorPackage
+            ?.let { add(it, EssentialReason.ALARMS) }
+        packagesFor(pm, Intent(Intent.ACTION_VIEW).setType(ContactsContract.Contacts.CONTENT_TYPE))
+            .forEach { add(it, EssentialReason.CONTACTS) }
+        context.getSystemService(InputMethodManager::class.java)?.enabledInputMethodList
+            ?.forEach { add(it.packageName, EssentialReason.KEYBOARD) }
+        context.getSystemService(AccessibilityManager::class.java)
+            ?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            ?.forEach { add(it.resolveInfo.serviceInfo.packageName, EssentialReason.ACCESSIBILITY) }
+        EssentialApps.KNOWN.forEach { (packageName, reason) -> add(packageName, reason) }
+        return result
     }
 
-    private fun launchers(context: Context): List<String> {
-        val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-        return context.packageManager
-            .queryIntentActivities(home, PackageManager.MATCH_DEFAULT_ONLY)
+    private fun packagesFor(pm: PackageManager, intent: Intent): List<String> =
+        pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
             .map { it.activityInfo.packageName }
-    }
 }

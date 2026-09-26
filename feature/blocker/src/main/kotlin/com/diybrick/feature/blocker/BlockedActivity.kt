@@ -2,7 +2,6 @@ package com.diybrick.feature.blocker
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -24,15 +23,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.diybrick.core.model.ListType
 import com.diybrick.core.ui.DiyBrickTheme
+import java.text.DateFormat
+import java.util.Date
 
-/** Full-screen "this app is bricked" page shown in place of a blocked app. */
+/** Full-screen page shown in place of a blocked app, explaining why it was closed. */
 class BlockedActivity : ComponentActivity() {
-    private var appLabel by mutableStateOf("This app")
+    private var info by mutableStateOf(BlockInfo("This app", ListType.BLOCK, null))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appLabel = labelFor(intent)
+        info = infoFrom(intent)
         setContent {
             DiyBrickTheme {
                 BackHandler { goHome() }
@@ -46,13 +48,18 @@ class BlockedActivity : ComponentActivity() {
                     ) {
                         Text("🧱", style = MaterialTheme.typography.displayLarge)
                         Text(
-                            "$appLabel is bricked",
+                            "${info.appLabel} was closed",
                             style = MaterialTheme.typography.headlineMedium,
                             textAlign = TextAlign.Center,
                         )
                         Text(
-                            "Tap your key to unbrick your phone.",
+                            info.explanation(),
                             style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "To use it again, tap your key to unbrick your phone.",
+                            style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                         )
                         Button(onClick = ::goHome, modifier = Modifier.fillMaxWidth()) {
@@ -69,16 +76,16 @@ class BlockedActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        appLabel = labelFor(intent)
+        info = infoFrom(intent)
     }
 
-    private fun labelFor(intent: Intent): String {
-        val packageName = intent.getStringExtra(EXTRA_PACKAGE) ?: return "This app"
-        return try {
-            packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0)).toString()
-        } catch (e: PackageManager.NameNotFoundException) {
-            "This app"
-        }
+    private fun infoFrom(intent: Intent): BlockInfo {
+        val packageName = intent.getStringExtra(EXTRA_PACKAGE)
+        return BlockInfo(
+            appLabel = packageName?.let { AppLabels.of(this, it) } ?: "This app",
+            listType = intent.getStringExtra(EXTRA_LIST_TYPE)?.let(ListType::valueOf) ?: ListType.BLOCK,
+            since = intent.getLongExtra(EXTRA_SINCE, -1L).takeIf { it >= 0 },
+        )
     }
 
     private fun goHome() {
@@ -93,12 +100,30 @@ class BlockedActivity : ComponentActivity() {
         finish()
     }
 
+    private data class BlockInfo(val appLabel: String, val listType: ListType, val since: Long?) {
+        fun explanation(): String {
+            val bricked = since
+                ?.let { "Your phone has been bricked since ${timeFormat.format(Date(it))}" }
+                ?: "Your phone is bricked"
+            return when (listType) {
+                ListType.BLOCK -> "$bricked, and $appLabel is on your list of apps to block."
+                ListType.ALLOW -> "$bricked, and only the apps you allowed (plus calls, messages, " +
+                    "alarms and other essentials) can open."
+            }
+        }
+    }
+
     companion object {
         private const val EXTRA_PACKAGE = "package"
+        private const val EXTRA_LIST_TYPE = "list_type"
+        private const val EXTRA_SINCE = "since"
+        private val timeFormat: DateFormat get() = DateFormat.getTimeInstance(DateFormat.SHORT)
 
-        fun intent(context: Context, packageName: String): Intent =
+        fun intent(context: Context, packageName: String, listType: ListType, since: Long): Intent =
             Intent(context, BlockedActivity::class.java)
                 .putExtra(EXTRA_PACKAGE, packageName)
+                .putExtra(EXTRA_LIST_TYPE, listType.name)
+                .putExtra(EXTRA_SINCE, since)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 }

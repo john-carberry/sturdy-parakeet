@@ -77,7 +77,7 @@ fun ModeScreen(viewModel: ModeViewModel, onDone: () -> Unit) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
                     LazyColumn {
-                        items(viewModel.visibleApps, key = { it.packageName }) { app ->
+                        items(viewModel.choosableApps, key = { it.packageName }) { app ->
                             val checked = app.packageName in draft.packages
                             ListItem(
                                 headlineContent = { Text(app.label) },
@@ -92,16 +92,37 @@ fun ModeScreen(viewModel: ModeViewModel, onDone: () -> Unit) {
                                 },
                             )
                         }
+                        if (viewModel.essentialApps.isNotEmpty()) {
+                            item(key = "essential-header") {
+                                Text(
+                                    "Always allowed: these keep your phone working, so they can't be blocked.",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
+                                )
+                            }
+                            items(viewModel.essentialApps, key = { "essential-" + it.packageName }) { app ->
+                                ListItem(
+                                    headlineContent = { Text(app.label) },
+                                    supportingContent = {
+                                        viewModel.essential[app.packageName]?.let { Text(it.description) }
+                                    },
+                                    leadingContent = {
+                                        Image(app.icon, contentDescription = null, modifier = Modifier.size(40.dp))
+                                    },
+                                    trailingContent = { Text("🔒") },
+                                )
+                            }
+                        }
                     }
                 }
             }
 
-            val count = draft.packages.size
+            val count = (draft.packages - viewModel.essential.keys).size
             Text(
                 when (draft.listType) {
                     ListType.BLOCK -> "$count app${if (count == 1) "" else "s"} will be blocked while bricked."
-                    ListType.ALLOW -> "Only $count app${if (count == 1) "" else "s"} (plus calls, the " +
-                        "keyboard and Settings) will work while bricked."
+                    ListType.ALLOW -> "Only $count app${if (count == 1) "" else "s"}, plus the always-allowed " +
+                        "essentials, will work while bricked."
                 },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.bodySmall,

@@ -165,7 +165,7 @@ private fun summary(mode: Mode): String {
     val apps = "$n app${if (n == 1) "" else "s"}"
     return when (mode.listType) {
         ListType.BLOCK -> if (n == 0) "No apps chosen to block yet." else "Blocks $apps."
-        ListType.ALLOW -> "Blocks everything except $apps, calls, the keyboard and Settings."
+        ListType.ALLOW -> "Blocks everything except $apps and essentials like calls, messages and alarms."
     }
 }
 
