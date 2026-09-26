@@ -30,7 +30,7 @@ import java.util.Date
 
 /** Full-screen page shown in place of a blocked app, explaining why it was closed. */
 class BlockedActivity : ComponentActivity() {
-    private var info by mutableStateOf(BlockInfo("This app", ListType.BLOCK, null))
+    private var info by mutableStateOf(BlockInfo("This app", ListType.BLOCK, null, tamper = false))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +48,7 @@ class BlockedActivity : ComponentActivity() {
                     ) {
                         Text("🧱", style = MaterialTheme.typography.displayLarge)
                         Text(
-                            "${info.appLabel} was closed",
+                            info.title(),
                             style = MaterialTheme.typography.headlineMedium,
                             textAlign = TextAlign.Center,
                         )
@@ -58,7 +58,7 @@ class BlockedActivity : ComponentActivity() {
                             textAlign = TextAlign.Center,
                         )
                         Text(
-                            "To use it again, tap your key to unbrick your phone.",
+                            info.nextStep(),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                         )
@@ -85,6 +85,7 @@ class BlockedActivity : ComponentActivity() {
             appLabel = packageName?.let { AppLabels.of(this, it) } ?: "This app",
             listType = intent.getStringExtra(EXTRA_LIST_TYPE)?.let(ListType::valueOf) ?: ListType.BLOCK,
             since = intent.getLongExtra(EXTRA_SINCE, -1L).takeIf { it >= 0 },
+            tamper = intent.getBooleanExtra(EXTRA_TAMPER, false),
         )
     }
 
@@ -100,11 +101,28 @@ class BlockedActivity : ComponentActivity() {
         finish()
     }
 
-    private data class BlockInfo(val appLabel: String, val listType: ListType, val since: Long?) {
+    private data class BlockInfo(
+        val appLabel: String,
+        val listType: ListType,
+        val since: Long?,
+        /** Closed a Settings screen that could switch DIY Brick off, rather than an app. */
+        val tamper: Boolean,
+    ) {
+        fun title(): String = if (tamper) "DIY Brick settings are locked" else "$appLabel was closed"
+
+        fun nextStep(): String = if (tamper) {
+            "Tap your key to unbrick first, then you can change these settings."
+        } else {
+            "To use it again, tap your key to unbrick your phone."
+        }
+
         fun explanation(): String {
             val bricked = since
                 ?.let { "Your phone has been bricked since ${timeFormat.format(Date(it))}" }
                 ?: "Your phone is bricked"
+            if (tamper) {
+                return "$bricked, so DIY Brick can't be switched off, force stopped or uninstalled."
+            }
             return when (listType) {
                 ListType.BLOCK -> "$bricked, and $appLabel is on your list of apps to block."
                 ListType.ALLOW -> "$bricked, and only the apps you allowed (plus calls, messages, " +
@@ -117,12 +135,19 @@ class BlockedActivity : ComponentActivity() {
         private const val EXTRA_PACKAGE = "package"
         private const val EXTRA_LIST_TYPE = "list_type"
         private const val EXTRA_SINCE = "since"
+        private const val EXTRA_TAMPER = "tamper"
         private val timeFormat: DateFormat get() = DateFormat.getTimeInstance(DateFormat.SHORT)
 
         fun intent(context: Context, packageName: String, listType: ListType, since: Long): Intent =
             Intent(context, BlockedActivity::class.java)
                 .putExtra(EXTRA_PACKAGE, packageName)
                 .putExtra(EXTRA_LIST_TYPE, listType.name)
+                .putExtra(EXTRA_SINCE, since)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        fun tamperIntent(context: Context, since: Long): Intent =
+            Intent(context, BlockedActivity::class.java)
+                .putExtra(EXTRA_TAMPER, true)
                 .putExtra(EXTRA_SINCE, since)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }

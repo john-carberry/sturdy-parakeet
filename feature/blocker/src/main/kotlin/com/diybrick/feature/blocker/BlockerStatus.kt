@@ -1,5 +1,6 @@
 package com.diybrick.feature.blocker
 
+import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -27,6 +28,20 @@ object BlockerStatus {
 
     fun accessibilitySettingsIntent() = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
 
+    /** Whether uninstall protection (device admin) is on. */
+    fun isAdminActive(context: Context): Boolean =
+        context.getSystemService(DevicePolicyManager::class.java)
+            ?.isAdminActive(ComponentName(context, BrickAdminReceiver::class.java)) == true
+
+    fun addAdminIntent(context: Context) =
+        Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+            .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, ComponentName(context, BrickAdminReceiver::class.java))
+            .putExtra(
+                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Stops DIY Brick being uninstalled while your phone is bricked. " +
+                    "It can't see or change anything else on your phone.",
+            )
+
     /** App info, where Android 13+ hides "Allow restricted settings" for sideloaded apps. */
     fun appInfoIntent(context: Context) =
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
@@ -34,9 +49,16 @@ object BlockerStatus {
 
 /** Blocker on/off, re-checked whenever the screen resumes (e.g. back from Settings). */
 @Composable
-fun rememberBlockerEnabled(): Boolean {
+fun rememberBlockerEnabled(): Boolean = rememberOnResume(BlockerStatus::isEnabled)
+
+/** Uninstall protection on/off, re-checked whenever the screen resumes. */
+@Composable
+fun rememberAdminActive(): Boolean = rememberOnResume(BlockerStatus::isAdminActive)
+
+@Composable
+private fun rememberOnResume(check: (Context) -> Boolean): Boolean {
     val context = LocalContext.current
-    var enabled by remember { mutableStateOf(BlockerStatus.isEnabled(context)) }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { enabled = BlockerStatus.isEnabled(context) }
-    return enabled
+    var value by remember { mutableStateOf(check(context)) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { value = check(context) }
+    return value
 }

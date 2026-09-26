@@ -26,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,13 +37,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.diybrick.core.model.BrickRules
+import com.diybrick.core.model.BrickSettings
 import com.diybrick.core.model.BrickState
 import com.diybrick.core.model.ListType
 import com.diybrick.core.model.Mode
+import com.diybrick.feature.blocker.rememberAdminActive
 import com.diybrick.feature.blocker.rememberBlockerEnabled
 import com.diybrick.feature.nfc.NfcStatus
 import com.diybrick.feature.nfc.OnNfcTag
 import com.diybrick.feature.nfc.rememberNfcStatus
+import kotlinx.coroutines.delay
 import java.text.DateFormat
 import java.util.Date
 
@@ -63,6 +68,7 @@ fun HomeScreen(
     val emergencyLeft by viewModel.emergencyUnbricksRemaining.collectAsStateWithLifecycle()
     val mode by viewModel.mode.collectAsStateWithLifecycle()
     val blockerEnabled = rememberBlockerEnabled()
+    val adminActive = rememberAdminActive()
     val nfcStatus = rememberNfcStatus()
     val context = LocalContext.current
     var confirmEmergency by remember { mutableStateOf(false) }
@@ -83,7 +89,12 @@ fun HomeScreen(
         ) {
             state?.let { StatusCard(it, mode) }
             viewModel.notice?.let { NoticeCard(it) }
-            if (!blockerEnabled) BlockerOffCard(onSetUpBlocker)
+            when {
+                !blockerEnabled -> BlockerOffCard(onSetUpBlocker)
+                !adminActive -> TextButton(onClick = onSetUpBlocker) {
+                    Text("Recommended: turn on uninstall protection")
+                }
+            }
 
             when (keyCount) {
                 null -> Unit
@@ -120,10 +131,15 @@ fun HomeScreen(
                 }
             }
 
-            if (bricked) {
-                TextButton(onClick = { confirmEmergency = true }) {
-                    Text("Emergency unbrick (${emergencyLeft ?: "…"} left)")
-                }
+            (state as? BrickState.Bricked)?.let { current ->
+                EmergencySection(
+                    requestedAt = current.emergencyRequestedAt,
+                    remaining = emergencyLeft,
+                    settings = viewModel.settings,
+                    onStart = { confirmEmergency = true },
+                    onUse = viewModel::emergencyUnbrick,
+                    onCancel = viewModel::cancelEmergencyUnbrick,
+                )
             }
         }
     }
@@ -131,8 +147,9 @@ fun HomeScreen(
     if (confirmEmergency) {
         EmergencyDialog(
             remaining = emergencyLeft ?: 0,
+            settings = viewModel.settings,
             onConfirm = {
-                viewModel.emergencyUnbrick()
+                viewModel.requestEmergencyUnbrick()
                 confirmEmergency = false
             },
             onDismiss = { confirmEmergency = false },
@@ -196,15 +213,21 @@ private fun NoticeCard(notice: Notice) {
 }
 
 @Composable
-private fun EmergencyDialog(remaining: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+private fun EmergencyDialog(
+    remaining: Int,
+    settings: BrickSettings,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Emergency unbrick?") },
         text = {
             Text(
                 if (remaining > 0) {
-                    "You have $remaining left, and they don't come back. " +
-                        "Only use one if you really can't get to your key."
+                    "This starts a ${settings.emergencyWaitMinutes}-minute wait. After that you'll have " +
+                        "${settings.emergencyReadyMinutes} minutes to unbrick. You have $remaining left, " +
+                        "and they don't come back. Only use one if you really can't get to your key."
                 } else {
                     "You've used all your emergency unbricks. You'll need your key."
                 },
@@ -212,11 +235,57 @@ private fun EmergencyDialog(remaining: Int, onConfirm: () -> Unit, onDismiss: ()
         },
         confirmButton = {
             if (remaining > 0) {
-                TextButton(onClick = onConfirm) { Text("Use one") }
+                TextButton(onClick = onConfirm) { Text("Start the wait") }
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
+}
+
+/** Emergency unbrick controls: start, count down, then use within the ready window. */
+@Composable
+private fun EmergencySection(
+    requestedAt: Long?,
+    remaining: Int?,
+    settings: BrickSettings,
+    onStart: () -> Unit,
+    onUse: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(requestedAt) {
+        while (requestedAt != null) {
+            now = System.currentTimeMillis()
+            delay(1_000)
+        }
+    }
+    when (val status = BrickRules.emergencyStatus(requestedAt, now, settings)) {
+        BrickRules.EmergencyStatus.NotRequested -> TextButton(onClick = onStart) {
+            Text("Emergency unbrick (${remaining ?: "…"} left)")
+        }
+        is BrickRules.EmergencyStatus.Waiting -> Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Emergency unbrick in ${countdown(status.msLeft)}", style = MaterialTheme.typography.titleMedium)
+                Text("Tapping your key still unbricks straight away.")
+                TextButton(onClick = onCancel) { Text("Cancel") }
+            }
+        }
+        is BrickRules.EmergencyStatus.Ready -> Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Emergency unbrick ready", style = MaterialTheme.typography.titleMedium)
+                Text("Use it in the next ${countdown(status.msLeft)} or it lapses.")
+                Button(onClick = onUse, modifier = Modifier.fillMaxWidth()) {
+                    Text("Unbrick now (uses 1 of ${remaining ?: "…"})")
+                }
+                TextButton(onClick = onCancel) { Text("Cancel") }
+            }
+        }
+    }
+}
+
+private fun countdown(ms: Long): String {
+    val totalSeconds = (ms + 999) / 1_000
+    return "%d:%02d".format(totalSeconds / 60, totalSeconds % 60)
 }
 
 /** Asks once for notification permission (Android 13+) so the "Bricked" notification shows. */

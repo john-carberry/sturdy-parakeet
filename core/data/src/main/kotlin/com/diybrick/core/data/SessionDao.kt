@@ -19,6 +19,9 @@ internal interface SessionDao {
     @Query("UPDATE sessions SET endedAt = :endedAt, endReason = :endReason WHERE id = :id")
     suspend fun end(id: Long, endedAt: Long, endReason: String)
 
+    @Query("UPDATE sessions SET emergencyRequestedAt = :at WHERE id = :id")
+    suspend fun setEmergencyRequestedAt(id: Long, at: Long?)
+
     @Query("SELECT COUNT(*) FROM sessions WHERE endReason = :reason")
     fun observeCountByEndReason(reason: String): Flow<Int>
 

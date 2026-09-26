@@ -14,7 +14,7 @@ import kotlinx.coroutines.sync.withLock
 /** Persists the brick state (PLAN.md §4.3) so it survives app restarts and reboots. */
 class BrickRepository internal constructor(
     private val dao: SessionDao,
-    private val settings: BrickSettings = BrickSettings(),
+    val settings: BrickSettings = BrickSettings(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     // Serialises read-decide-write so two quick taps can't both brick.
@@ -34,22 +34,40 @@ class BrickRepository internal constructor(
         apply(open, BrickRules.onKey(open.toState()))
     }
 
+    /** Starts the emergency-unbrick wait (PLAN.md §4.1, screen 7). */
+    suspend fun requestEmergencyUnbrick(): Outcome = mutex.withLock {
+        val open = dao.getOpen()
+        val outcome = BrickRules.onEmergencyRequest(open.toState(), emergencyRemaining())
+        if (open != null && outcome == Outcome.EmergencyRequested) {
+            val pending = BrickRules.emergencyStatus(open.emergencyRequestedAt, clock(), settings)
+            // Asking again doesn't restart a wait that's already running.
+            if (pending == BrickRules.EmergencyStatus.NotRequested) dao.setEmergencyRequestedAt(open.id, clock())
+        }
+        outcome
+    }
+
+    suspend fun cancelEmergencyUnbrick() = mutex.withLock {
+        dao.getOpen()?.let { dao.setEmergencyRequestedAt(it.id, null) }
+    }
+
+    /** Uses an emergency unbrick, once its wait is over. */
     suspend fun emergencyUnbrick(): Outcome = mutex.withLock {
         val open = dao.getOpen()
-        val used = dao.countByEndReason(EndReason.EMERGENCY.name)
-        val remaining = BrickRules.emergencyUnbricksRemaining(settings, used)
-        apply(open, BrickRules.onEmergencyUnbrick(open.toState(), remaining))
+        apply(open, BrickRules.onEmergencyUnbrick(open.toState(), emergencyRemaining(), clock(), settings))
     }
+
+    private suspend fun emergencyRemaining(): Int =
+        BrickRules.emergencyUnbricksRemaining(settings, dao.countByEndReason(EndReason.EMERGENCY.name))
 
     private suspend fun apply(open: SessionEntity?, outcome: Outcome): Outcome {
         when (outcome) {
             is Outcome.Brick -> dao.insert(SessionEntity(modeId = outcome.modeId, startedAt = clock()))
             is Outcome.Unbrick -> open?.let { dao.end(it.id, clock(), outcome.reason.name) }
-            is Outcome.Denied -> Unit
+            is Outcome.Denied, Outcome.EmergencyRequested -> Unit
         }
         return outcome
     }
 
     private fun SessionEntity?.toState(): BrickState =
-        this?.let { BrickState.Bricked(it.modeId, it.startedAt) } ?: BrickState.Free
+        this?.let { BrickState.Bricked(it.modeId, it.startedAt, it.emergencyRequestedAt) } ?: BrickState.Free
 }

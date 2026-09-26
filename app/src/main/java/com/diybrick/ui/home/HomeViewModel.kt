@@ -76,25 +76,45 @@ class HomeViewModel(
         }
     }
 
-    fun emergencyUnbrick() {
+    val settings = brick.settings
+
+    fun requestEmergencyUnbrick() {
+        viewModelScope.launch { notice = describe(brick.requestEmergencyUnbrick()) }
+    }
+
+    fun cancelEmergencyUnbrick() {
         viewModelScope.launch {
-            notice = when (val outcome = brick.emergencyUnbrick()) {
-                is Outcome.Unbrick -> Notice("🟢 Unbricked with an emergency unbrick.")
-                is Outcome.Denied -> when (outcome.reason) {
-                    DenyReason.NO_EMERGENCY_UNBRICKS_LEFT ->
-                        Notice("No emergency unbricks left. You'll need your key.", isError = true)
-                    DenyReason.NOT_BRICKED -> null
-                }
-                is Outcome.Brick -> null
-            }
+            brick.cancelEmergencyUnbrick()
+            notice = null
         }
+    }
+
+    fun emergencyUnbrick() {
+        viewModelScope.launch { notice = describe(brick.emergencyUnbrick()) }
+    }
+
+    private fun describe(outcome: Outcome): Notice? = when (outcome) {
+        is Outcome.Unbrick -> Notice("🟢 Unbricked with an emergency unbrick.")
+        Outcome.EmergencyRequested -> Notice(
+            "Emergency unbrick starts in ${settings.emergencyWaitMinutes} minutes. " +
+                "Tapping your key still works in the meantime.",
+        )
+        is Outcome.Denied -> when (outcome.reason) {
+            DenyReason.NO_EMERGENCY_UNBRICKS_LEFT ->
+                Notice("No emergency unbricks left. You'll need your key.", isError = true)
+            DenyReason.EMERGENCY_STILL_WAITING -> Notice("The emergency unbrick isn't ready yet.", isError = true)
+            DenyReason.EMERGENCY_NOT_REQUESTED ->
+                Notice("That emergency unbrick lapsed. Start a new one if you still need it.", isError = true)
+            DenyReason.NOT_BRICKED -> null
+        }
+        is Outcome.Brick -> null
     }
 
     private suspend fun present(key: Key) {
         notice = when (brick.onKey()) {
             is Outcome.Brick -> Notice("🧱 Bricked with “${key.label}”.")
             is Outcome.Unbrick -> Notice("🟢 Unbricked with “${key.label}”.")
-            is Outcome.Denied -> null
+            is Outcome.Denied, Outcome.EmergencyRequested -> null
         }
     }
 

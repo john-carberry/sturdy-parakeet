@@ -44,5 +44,10 @@ data class Session(
 
 sealed interface BrickState {
     data object Free : BrickState
-    data class Bricked(val modeId: Long, val since: Long) : BrickState
+    data class Bricked(
+        val modeId: Long,
+        val since: Long,
+        /** When an emergency unbrick was requested, if one is pending. */
+        val emergencyRequestedAt: Long? = null,
+    ) : BrickState
 }

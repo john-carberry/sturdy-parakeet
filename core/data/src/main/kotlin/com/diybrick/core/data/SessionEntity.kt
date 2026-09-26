@@ -12,4 +12,6 @@ internal data class SessionEntity(
     val startedAt: Long,
     val endedAt: Long? = null,
     val endReason: String? = null,
+    /** When an emergency unbrick was requested for this session, if one is pending. */
+    val emergencyRequestedAt: Long? = null,
 )
