@@ -3,35 +3,32 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- A dot-matrix open padlock, one path per row of dots; the keyhole is the one accent. -->
+    <!-- Themed-icon version: the same dots in one colour, keyhole left out. -->
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M51.5,30a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM57.5,30a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM63.5,30a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M45.5,36a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,36a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M45.5,42a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,42a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M69.5,48a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M33.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM39.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM45.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM51.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM57.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM63.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,54a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M33.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM39.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM45.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM51.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM57.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM63.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,60a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M33.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM39.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM45.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM57.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM63.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M33.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM39.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM45.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM57.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM63.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
     <path
-        android:fillColor="#F3F0E8"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M33.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM39.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM45.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM51.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM57.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM63.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM69.5,78a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
-    <path
-        android:fillColor="#E85A2C"
-        android:pathData="M51.5,66a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0zM51.5,72a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0z" />
 </vector>

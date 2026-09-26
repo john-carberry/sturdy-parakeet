@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.livefree.core.ui.LiveFreeTheme
 import com.livefree.feature.nfc.NfcStatus
 import com.livefree.feature.nfc.OnNfcTag
 import com.livefree.feature.nfc.rememberNfcStatus
@@ -49,7 +50,7 @@ fun TapCardScreen(title: String, onTapped: (ByteArray) -> Unit, onBack: () -> Un
         ) {
             when (nfcStatus) {
                 NfcStatus.READY -> {
-                    Text("📇", style = MaterialTheme.typography.displayLarge)
+                    Text("TAP", style = MaterialTheme.typography.displayLarge, color = LiveFreeTheme.signal)
                     Text(
                         "Hold your card flat against the back of your phone",
                         style = MaterialTheme.typography.headlineSmall,

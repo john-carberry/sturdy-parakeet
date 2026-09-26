@@ -15,6 +15,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.livefree.core.model.Key
 import com.livefree.core.model.KeyType
+import com.livefree.core.ui.MonoLabel
 import com.livefree.ui.components.BackTopBar
 import java.text.DateFormat
 import java.util.Date
@@ -104,13 +107,15 @@ fun KeysScreen(
 @Composable
 private fun KeyRow(key: Key, removable: Boolean, onRemove: () -> Unit) {
     val kind = when (key.type) {
-        KeyType.NFC_UID, KeyType.NFC_NDEF -> "📇 NFC card"
-        KeyType.QR -> "🔳 QR code"
+        KeyType.NFC_UID, KeyType.NFC_NDEF -> "NFC card"
+        KeyType.QR -> "QR code"
     }
     val added = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(key.createdAt))
     ListItem(
-        headlineContent = { Text(key.label) },
-        supportingContent = { Text("$kind · added $added") },
+        overlineContent = { MonoLabel(kind) },
+        headlineContent = { Text(key.label, style = MaterialTheme.typography.titleMedium) },
+        supportingContent = { Text("Added $added", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
         trailingContent = {
             IconButton(onClick = onRemove, enabled = removable) {
                 Icon(Icons.Default.Delete, contentDescription = "Remove ${key.label}")

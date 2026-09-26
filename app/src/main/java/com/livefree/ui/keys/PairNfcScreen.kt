@@ -86,7 +86,7 @@ fun PairNfcScreen(viewModel: PairNfcViewModel, onDone: () -> Unit) {
                     Text("Tap a different card to try again.")
                 }
                 is State.Confirmed -> {
-                    Instruction("Card read ✓", "Give it a name so you can recognise it later.")
+                    Instruction("Card read", "Give it a name so you can recognise it later.")
                     OutlinedTextField(
                         value = viewModel.label,
                         onValueChange = { viewModel.label = it.take(40) },

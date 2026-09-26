@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.paparazzi)
 }
 
 android {
@@ -25,8 +26,8 @@ android {
         applicationId = "com.livefree"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "0.6.0"
+        versionCode = 10
+        versionName = "0.7.0"
     }
 
     buildTypes {

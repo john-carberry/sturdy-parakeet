@@ -1,5 +1,6 @@
 package com.livefree.ui.stats
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,10 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.livefree.core.model.LockStats
+import com.livefree.core.ui.MonoLabel
+import com.livefree.core.ui.SpaceGrotesk
 import com.livefree.ui.components.BackTopBar
 import java.time.format.TextStyle
 import java.util.Locale
@@ -29,32 +32,37 @@ import java.util.Locale
 fun StatsScreen(viewModel: StatsViewModel, onBack: () -> Unit) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
 
-    Scaffold(topBar = { BackTopBar("Your stats", onBack) }) { padding ->
+    StatsContent(stats, onBack)
+}
+
+@Composable
+fun StatsContent(stats: LockStats?, onBack: () -> Unit = {}) {
+    Scaffold(topBar = { BackTopBar("Stats", onBack) }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             val s = stats ?: return@Column
-            // The one hero figure for this view.
+            // The one hero figure for this view, in the reading sans (not the display face).
             Column {
-                Text("Locked in the last 7 days", style = MaterialTheme.typography.titleMedium)
+                MonoLabel("Locked · last 7 days")
                 Text(
                     formatDuration(s.totalLockedMs),
-                    style = MaterialTheme.typography.displayMedium,
+                    style = MaterialTheme.typography.displayMedium.copy(fontFamily = SpaceGrotesk),
                     fontWeight = FontWeight.SemiBold,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatTile("Streak", "${s.streakDays} day${if (s.streakDays == 1) "" else "s"}", Modifier.weight(1f))
-                StatTile("Longest lock", formatDuration(s.longestSessionMs), Modifier.weight(1f))
-                StatTile("Apps stopped", "%,d".format(s.totalBlockedOpens), Modifier.weight(1f))
+                StatTile("Longest", formatDuration(s.longestSessionMs), Modifier.weight(1f))
+                StatTile("Blocked", "%,d".format(s.totalBlockedOpens), Modifier.weight(1f))
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Hours locked per day", style = MaterialTheme.typography.titleMedium)
+                MonoLabel("Hours locked per day")
                 Text(
                     "Tap a day to see its total.",
                     style = MaterialTheme.typography.bodySmall,
@@ -69,13 +77,13 @@ fun StatsScreen(viewModel: StatsViewModel, onBack: () -> Unit) {
 
 @Composable
 private fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
-    Card(modifier = modifier) {
-        Column(Modifier.padding(12.dp)) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            MonoLabel(label)
             Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
         }
     }
@@ -86,8 +94,8 @@ private fun StatTile(label: String, value: String, modifier: Modifier = Modifier
 private fun DayTable(stats: LockStats) {
     val locale = Locale.getDefault()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        TableRow("Day", "Locked", "Apps stopped", header = true)
-        HorizontalDivider()
+        TableRow("Day", "Locked", "Blocked", header = true)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         stats.days.asReversed().forEach { day ->
             TableRow(
                 day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale),
@@ -103,8 +111,9 @@ private fun TableRow(day: String, locked: String, stopped: String, header: Boole
     val style = if (header) MaterialTheme.typography.labelMedium else MaterialTheme.typography.bodyMedium
     val color = if (header) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
     Row(modifier = Modifier.fillMaxWidth()) {
-        Text(day, style = style, color = color, modifier = Modifier.weight(1.4f))
-        Text(locked, style = style, color = color, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
-        Text(stopped, style = style, color = color, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
+        val show = { text: String -> if (header) text.uppercase() else text }
+        Text(show(day), style = style, color = color, modifier = Modifier.weight(1.4f))
+        Text(show(locked), style = style, color = color, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
+        Text(show(stopped), style = style, color = color, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
     }
 }

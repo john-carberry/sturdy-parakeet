@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.livefree.core.model.ListType
+import com.livefree.core.ui.MonoLabel
 import com.livefree.ui.components.BackTopBar
 
 @Composable
@@ -109,7 +110,7 @@ fun ModeScreen(viewModel: ModeViewModel, onDone: () -> Unit) {
                                     leadingContent = {
                                         Image(app.icon, contentDescription = null, modifier = Modifier.size(40.dp))
                                     },
-                                    trailingContent = { Text("🔒") },
+                                    trailingContent = { MonoLabel("Always on") },
                                 )
                             }
                         }

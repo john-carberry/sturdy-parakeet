@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.livefree.core.ui.MonoLabel
 import com.livefree.feature.blocker.BlockerStatus
 import com.livefree.feature.blocker.rememberAdminActive
 import com.livefree.feature.blocker.rememberBlockerEnabled
@@ -41,7 +42,7 @@ fun BlockerSetupScreen(onBack: () -> Unit) {
         ) {
             Text("App blocking", style = MaterialTheme.typography.headlineSmall)
             if (blockerOn) {
-                Text("✓ On")
+                MonoLabel("● On", color = MaterialTheme.colorScheme.onSurface)
             } else {
                 Text(
                     "Live Free uses an accessibility service to spot when a blocked app opens. " +
@@ -76,7 +77,8 @@ fun BlockerSetupScreen(onBack: () -> Unit) {
 
             Text("Uninstall protection", style = MaterialTheme.typography.headlineSmall)
             if (adminOn) {
-                Text("✓ On. Live Free can't be uninstalled while you're locked.")
+                MonoLabel("● On", color = MaterialTheme.colorScheme.onSurface)
+                Text("Live Free can't be uninstalled while you're locked.")
             } else {
                 Text(
                     "Recommended. Makes Live Free a “device admin” app, which Android won't " +

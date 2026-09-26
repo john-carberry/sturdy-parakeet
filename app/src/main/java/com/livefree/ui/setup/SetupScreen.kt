@@ -8,13 +8,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +34,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.livefree.core.ui.MonoLabel
+import com.livefree.core.ui.StatusDot
 import com.livefree.feature.blocker.rememberAdminActive
 import com.livefree.feature.blocker.rememberBlockerEnabled
 
@@ -61,84 +66,142 @@ fun SetupScreen(
         notificationsOn = it
     }
 
-    val essentialsDone = hasKey && hasApps && blockerOn
+    SetupContent(
+        steps = SetupSteps(
+            hasKey = hasKey,
+            hasApps = hasApps,
+            blockerOn = blockerOn,
+            adminOn = adminOn,
+            notificationsOn = notificationsOn,
+            showNotifications = Build.VERSION.SDK_INT >= 33,
+        ),
+        onPairKey = onPairKey,
+        onChooseApps = onChooseApps,
+        onProtection = onProtection,
+        onAllowNotifications = {
+            if (Build.VERSION.SDK_INT >= 33) askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        },
+        onFinish = {
+            viewModel.finish()
+            onFinish()
+        },
+    )
+}
 
+data class SetupSteps(
+    val hasKey: Boolean,
+    val hasApps: Boolean,
+    val blockerOn: Boolean,
+    val adminOn: Boolean,
+    val notificationsOn: Boolean,
+    val showNotifications: Boolean,
+) {
+    val essentialsDone: Boolean get() = hasKey && hasApps && blockerOn
+}
+
+@Composable
+fun SetupContent(
+    steps: SetupSteps,
+    onPairKey: () -> Unit = {},
+    onChooseApps: () -> Unit = {},
+    onProtection: () -> Unit = {},
+    onAllowNotifications: () -> Unit = {},
+    onFinish: () -> Unit = {},
+) {
     Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Welcome to Live Free", style = MaterialTheme.typography.headlineMedium)
+            MonoLabel("Setup")
+            Text("WELCOME", style = MaterialTheme.typography.displayMedium)
             Text(
                 "Lock distracting apps away and unlock them only with a card or QR code you keep " +
                     "somewhere else. A few steps to set up:",
                 style = MaterialTheme.typography.bodyLarge,
             )
+            Spacer(Modifier.height(8.dp))
 
             ChecklistItem(
-                done = hasKey,
+                number = 1,
+                done = steps.hasKey,
                 title = "Pair a key",
                 detail = "An old NFC card (hotel key, transit card, badge) or a printed QR code.",
                 onClick = onPairKey,
             )
             ChecklistItem(
-                done = hasApps,
+                number = 2,
+                done = steps.hasApps,
                 title = "Choose apps to block",
                 detail = "Calls, messages, alarms and other essentials always keep working.",
                 onClick = onChooseApps,
             )
             ChecklistItem(
-                done = blockerOn,
+                number = 3,
+                done = steps.blockerOn,
                 title = "Turn on app blocking",
                 detail = "Switch on the Live Free app blocker in Accessibility settings.",
                 onClick = onProtection,
             )
             ChecklistItem(
-                done = adminOn,
-                title = "Turn on uninstall protection (recommended)",
-                detail = "Stops Live Free being uninstalled while you're locked.",
+                number = 4,
+                done = steps.adminOn,
+                title = "Uninstall protection",
+                detail = "Recommended. Stops Live Free being uninstalled while you're locked.",
                 onClick = onProtection,
             )
-            if (Build.VERSION.SDK_INT >= 33) {
+            if (steps.showNotifications) {
                 ChecklistItem(
-                    done = notificationsOn,
-                    title = "Allow notifications (recommended)",
-                    detail = "Shows a “Locked” notification with a timer while you're locked.",
-                    onClick = { askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                    number = 5,
+                    done = steps.notificationsOn,
+                    title = "Allow notifications",
+                    detail = "Recommended. Shows a “Locked” notification with a timer.",
+                    onClick = onAllowNotifications,
                 )
             }
 
+            Spacer(Modifier.height(16.dp))
             Button(
-                onClick = {
-                    viewModel.finish()
-                    onFinish()
-                },
-                enabled = essentialsDone,
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Start using Live Free") }
-            if (!essentialsDone) {
-                TextButton(
-                    onClick = {
-                        viewModel.finish()
-                        onFinish()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("Skip for now") }
+                onClick = onFinish,
+                enabled = steps.essentialsDone,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+            ) { Text("Start using Live Free", style = MaterialTheme.typography.labelLarge) }
+            if (!steps.essentialsDone) {
+                TextButton(onClick = onFinish, modifier = Modifier.fillMaxWidth()) {
+                    Text("Skip for now", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ChecklistItem(done: Boolean, title: String, detail: String, onClick: () -> Unit) {
-    ListItem(
-        leadingContent = { Text(if (done) "✅" else "⬜", style = MaterialTheme.typography.titleLarge) },
-        headlineContent = { Text(title) },
-        supportingContent = { Text(detail) },
-        modifier = Modifier.clickable(enabled = !done, onClick = onClick),
-    )
+private fun ChecklistItem(number: Int, done: Boolean, title: String, detail: String, onClick: () -> Unit) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !done, onClick = onClick)
+                .padding(vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            MonoLabel("%02d".format(number), color = MaterialTheme.colorScheme.onSurface)
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            StatusDot(filled = done, modifier = Modifier.padding(top = 4.dp))
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    }
 }

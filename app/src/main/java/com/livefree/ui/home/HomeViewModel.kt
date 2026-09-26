@@ -5,14 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.livefree.core.data.LockRepository
 import com.livefree.core.data.KeyRepository
+import com.livefree.core.data.LockRepository
 import com.livefree.core.data.ModeRepository
+import com.livefree.core.model.Key
+import com.livefree.core.model.KeyType
 import com.livefree.core.model.LockRules.DenyReason
 import com.livefree.core.model.LockRules.Outcome
 import com.livefree.core.model.LockState
-import com.livefree.core.model.Key
-import com.livefree.core.model.KeyType
 import com.livefree.core.model.Mode
 import com.livefree.core.security.NfcUidPolicy
 import com.livefree.core.security.QrKeyPayload
@@ -99,7 +99,7 @@ class HomeViewModel(
     }
 
     private fun describe(outcome: Outcome): Notice? = when (outcome) {
-        is Outcome.Unlock -> Notice("🟢 Unlocked with an emergency unlock.")
+        is Outcome.Unlock -> Notice("Unlocked with an emergency unlock.")
         Outcome.EmergencyRequested -> Notice(
             "Emergency unlock starts in ${settings.emergencyWaitMinutes} minutes. " +
                 "Tapping your key still works in the meantime.",
@@ -117,8 +117,8 @@ class HomeViewModel(
 
     private suspend fun present(key: Key) {
         notice = when (lock.onKey()) {
-            is Outcome.Lock -> Notice("🔒 Locked with “${key.label}”.")
-            is Outcome.Unlock -> Notice("🟢 Unlocked with “${key.label}”.")
+            is Outcome.Lock -> Notice("Locked with “${key.label}”.")
+            is Outcome.Unlock -> Notice("Unlocked with “${key.label}”.")
             is Outcome.Denied, Outcome.EmergencyRequested -> null
         }
     }

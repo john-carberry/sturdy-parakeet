@@ -4,6 +4,20 @@ An Android app that locks distracting apps away until you tap an old NFC card or
 scan a printed QR code kept somewhere else. A do-it-yourself focus lock.
 See [PLAN.md](PLAN.md) for the full design and milestones.
 
+## Look
+
+Modern retro minimalism: paper and ink with one signal-orange accent reserved for
+"locked", a dot-matrix display face (Doto) for status words, Space Grotesk for
+reading and Space Mono for labels (all SIL Open Font License, see
+`core/ui/licenses/`), flat outlined cards and pill buttons.
+
+| Home | Locked (dark) | App closed | Stats |
+|---|---|---|---|
+| ![](app/src/test/snapshots/images/com.livefree.screenshots_HomeScreenshotTest_unlockedLight.png) | ![](app/src/test/snapshots/images/com.livefree.screenshots_HomeScreenshotTest_lockedDark.png) | ![](app/src/test/snapshots/images/com.livefree.screenshots_ScreensScreenshotTest_blocked.png) | ![](app/src/test/snapshots/images/com.livefree.screenshots_ScreensScreenshotTest_statsLight.png) |
+
+Screens are rendered on the JVM with Paparazzi: `./gradlew recordPaparazziDebug`
+updates these images from `app/src/test/java/com/livefree/screenshots/`.
+
 ## Project layout
 
 | Module | What it holds |
