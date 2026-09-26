@@ -1,3 +1,3 @@
 <resources>
-    <style name="Theme.DiyBrick" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.LiveFree" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

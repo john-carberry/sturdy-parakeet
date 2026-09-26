@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diybrick.feature.nfc"
+    namespace = "com.livefree.feature.nfc"
     compileSdk = 35
 
     defaultConfig {

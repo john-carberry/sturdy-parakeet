@@ -16,9 +16,9 @@ if [ -n "$forbidden_files" ]; then
   status=1
 fi
 
-# A real QR key is dbrick://key/v1/ followed by a 32-byte secret (43 base64url chars).
-if git grep --cached -nIE 'dbrick://key/v1/[A-Za-z0-9_-]{43}' -- . ':!scripts/check-no-secrets.sh'; then
-  echo "✗ A QR key secret is in the files above. Remove it: anyone with it can unbrick."
+# A real QR key is livefree://key/v1/ followed by a 32-byte secret (43 base64url chars).
+if git grep --cached -nIE 'livefree://key/v1/[A-Za-z0-9_-]{43}' -- . ':!scripts/check-no-secrets.sh'; then
+  echo "✗ A QR key secret is in the files above. Remove it: anyone with it can unlock."
   status=1
 fi
 

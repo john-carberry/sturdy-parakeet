@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diybrick"
+    namespace = "com.livefree"
     compileSdk = 35
 
     // Live Free's signing key comes from environment variables (GitHub secrets in the
@@ -22,11 +22,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.diybrick"
+        applicationId = "com.livefree"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "0.5.0"
+        versionCode = 9
+        versionName = "0.6.0"
     }
 
     buildTypes {

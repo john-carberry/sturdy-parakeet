@@ -3,8 +3,12 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- A simple brick: two rows of offset blocks. -->
+    <!-- An open padlock: Live Free. -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M32,40h21v12h-21z M55,40h21v12h-21z M32,56h10v12h-10z M44,56h20v12h-20z M66,56h10v12h-10z" />
+        android:pathData="M41,50 V38 a13,13 0 0 1 26,0 V40 h-7 V38 a6,6 0 0 0 -12,0 V50 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M34,50 h40 v28 h-40 z M50,62 a4,4 0 1 0 8,0 a4,4 0 1 0 -8,0 z M52.5,64 h3 v7 h-3 z" />
 </vector>

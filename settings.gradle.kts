@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "diy-brick"
+rootProject.name = "live-free"
 
 include(":app")
 include(":core:model")

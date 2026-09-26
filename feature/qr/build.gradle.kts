@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diybrick.feature.qr"
+    namespace = "com.livefree.feature.qr"
     compileSdk = 35
 
     defaultConfig {

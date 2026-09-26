@@ -8,12 +8,12 @@
 
     <application>
         <service
-            android:name=".BrickService"
+            android:name=".LockService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Keeps the user's self-imposed app blocking active while their phone is bricked." />
+                android:value="Keeps the user's self-imposed app blocking active while their phone is locked." />
         </service>
 
         <!-- Exported so the system can deliver these protected broadcasts; no one else can send them. -->

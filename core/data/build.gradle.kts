@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diybrick.core.data"
+    namespace = "com.livefree.core.data"
     compileSdk = 35
 
     defaultConfig {

@@ -1,7 +1,7 @@
 # Live Free
 
-An Android app that "bricks" distracting apps until you tap an old NFC card or
-scan a printed QR code. It's a do-it-yourself take on the Brick focus device.
+An Android app that locks distracting apps away until you tap an old NFC card or
+scan a printed QR code kept somewhere else. A do-it-yourself focus lock.
 See [PLAN.md](PLAN.md) for the full design and milestones.
 
 ## Project layout
@@ -11,11 +11,11 @@ See [PLAN.md](PLAN.md) for the full design and milestones.
 | `app/` | Android app (Kotlin, Jetpack Compose) |
 | `core/model/` | Plain Kotlin data model and default settings |
 | `core/security/` | Key hashing, QR key format, NFC two-tap pairing rules |
-| `core/data/` | Room database: paired keys (hashes only), brick sessions, blocked apps |
+| `core/data/` | Room database: paired keys (hashes only), lock sessions, blocked apps |
 | `core/ui/` | Shared Compose theme |
 | `feature/nfc/` | NFC reader mode and tag routing to screens |
 | `feature/qr/` | QR generation and printing (ZXing), scanning (CameraX + ML Kit) |
-| `feature/service/` | "Bricked" notification service and reboot/update receiver |
+| `feature/service/` | "Locked" notification service and reboot/update receiver |
 | `feature/blocker/` | Accessibility service that blocks apps and guards Live Free's Settings pages, uninstall protection (device admin), and the "app was closed" screen |
 
 ## Build
@@ -35,17 +35,17 @@ push, and uploads the APK as a build artifact.
 1. Open **Manage keys** and add an NFC card (tap it twice) or a QR code (print it, then save).
    Then **Choose apps to block**, and follow **Protection setup** (app blocking and
    uninstall protection) when the home screen asks.
-2. Back on the home screen, tap a paired card or scan your QR code to brick the phone.
-   Do it again to unbrick. A "Bricked" notification with a timer shows meanwhile.
-3. Stuck without your key? Start one of your 5 emergency unbricks (they don't refill).
+2. Back on the home screen, tap a paired card or scan your QR code to lock the phone.
+   Do it again to unlock. A "Locked" notification with a timer shows meanwhile.
+3. Stuck without your key? Start one of your 5 emergency unlocks (they don't refill).
    It unlocks after a 10-minute wait and must then be used within 5 minutes.
 
-While bricked, opening a blocked app sends you Home and shows "This app is bricked".
+While locked, opening a blocked app sends you Home and shows "This app is locked".
 Calls, messages, alarms, the keyboard, the launcher and Settings always work. Keys and
-blocked apps can't be changed while bricked, and Live Free's own Settings pages (its
-accessibility switch, App info, device admin, uninstall) are closed while bricked.
+blocked apps can't be changed while locked, and Live Free's own Settings pages (its
+accessibility switch, App info, device admin, uninstall) are closed while locked.
 
-To remove Live Free: unbrick, turn off "Live Free uninstall protection" under
+To remove Live Free: unlock, turn off "Live Free uninstall protection" under
 Settings › Security › Device admin apps, then uninstall as usual.
 
 Known limits: Safe Mode disables third-party accessibility services, and the Settings
@@ -60,12 +60,12 @@ repository; the workflow reads it from four repository secrets
 
 | Secret | Value |
 |---|---|
-| `LIVEFREE_KEYSTORE_BASE64` | the keystore file, base64-encoded |
-| `LIVEFREE_KEYSTORE_PASSWORD` | keystore password |
-| `LIVEFREE_KEY_ALIAS` | key alias |
-| `LIVEFREE_KEY_PASSWORD` | key password |
+| `LIVEUNLOCKED_KEYSTORE_BASE64` | the keystore file, base64-encoded |
+| `LIVEUNLOCKED_KEYSTORE_PASSWORD` | keystore password |
+| `LIVEUNLOCKED_KEY_ALIAS` | key alias |
+| `LIVEUNLOCKED_KEY_PASSWORD` | key password |
 
-Builds on any machine use the same key when `LIVEFREE_KEYSTORE_FILE` and the three
+Builds on any machine use the same key when `LIVEUNLOCKED_KEYSTORE_FILE` and the three
 password/alias variables are set. Android only updates an app signed with the same
 key, so keep a safe copy: losing it means uninstalling (and re-pairing keys) to update.
 
@@ -85,7 +85,7 @@ key, so keep a safe copy: losing it means uninstalling (and re-pairing keys) to 
 
 - [x] M0 — project skeleton, CI
 - [x] M1 — key pairing (NFC card + QR code)
-- [x] M2 — brick state machine and background service
+- [x] M2 — lock state machine and background service
 - [x] M3 — app blocking
-- [x] M4 — hardening and emergency unbricks
+- [x] M4 — hardening and emergency unlocks
 - [x] M5 — polish and first release (setup checklist, stats, signed GitHub Releases)

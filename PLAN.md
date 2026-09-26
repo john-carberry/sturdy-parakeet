@@ -1,7 +1,7 @@
-# Live Free (DIY "Brick" for Android) — Project Plan
+# Live Free — Project Plan
 
-A do-it-yourself alternative to the Brick focus device. Instead of buying their
-NFC puck, you "brick" and "unbrick" your phone by tapping a **card you already
+A do-it-yourself phone lock for focus. Instead of buying a dedicated NFC
+gadget, you lock and unlock your phone by tapping a **card you already
 own** (NFC) or by scanning a **QR code** you printed and put somewhere out of
 reach. Blocking and settings are handled by an Android app.
 
@@ -18,9 +18,9 @@ reach. Blocking and settings are handled by an Android app.
      its own copy.
 3. **Pick a mode.** A mode is a named list of blocked apps (or allowed apps).
    Examples: "Work", "Sleep", "Weekend".
-4. **Brick.** Tap the card or scan the QR code. The chosen apps are now blocked.
-5. **Unbrick.** Tap the same card or scan the same QR code again. Without the key
-   you have to use one of a small number of **emergency unbricks**, which can
+4. **Lock.** Tap the card or scan the QR code. The chosen apps are now blocked.
+5. **Unlock.** Tap the same card or scan the same QR code again. Without the key
+   you have to use one of a small number of **emergency unlocks**, which can
    come with a waiting period.
 
 ---
@@ -58,7 +58,7 @@ card at the office and a QR code at home.
 
 ### 2.2 QR code details
 - At setup, generate a random 256-bit secret. Encode it as
-  `dbrick://key/v1/<base64url-secret>` and store only its hash.
+  `livefree://key/v1/<base64url-secret>` and store only its hash.
 - Render the QR code (ZXing `QRCodeWriter`) once, for print or share, then
   **delete it**. Offer "Save as PDF to print" and block screenshots on that
   screen with `FLAG_SECURE`.
@@ -80,18 +80,18 @@ This is the hardest part technically. There are three tiers; ship tier A first.
 
 | Tier | Mechanism | Strength | Setup effort |
 |---|---|---|---|
-| **A (MVP)** | `AccessibilityService` detects the foreground app → shows a full-screen "This app is bricked" overlay and sends the user Home | Good | Toggle one setting |
+| **A (MVP)** | `AccessibilityService` detects the foreground app → shows a full-screen "This app is locked" overlay and sends the user Home | Good | Toggle one setting |
 | B (fallback) | `UsageStatsManager` polling + `SYSTEM_ALERT_WINDOW` overlay | Medium (slight lag) | Two permission screens |
 | **C (strict mode)** | **Device Owner** + `DevicePolicyManager.setPackagesSuspended()`. The OS itself greys out the apps | Very strong | One-time `adb` command on a freshly reset or no-account phone |
 
-Extra hardening while bricked (tier A):
+Extra hardening while locked (tier A):
 - Block the Accessibility settings page, the app's own App Info page, and the
   uninstall dialog. Otherwise disabling the service is a two-tap cheat.
 - Register as a **Device Admin** so the app can't be uninstalled without
   deactivating it first. That deactivation screen is blocked too.
-- A foreground service with a persistent notification ("Bricked since 9:14 • Work")
+- A foreground service with a persistent notification ("Locked since 9:14 • Work")
   keeps the process alive. Re-arm on `BOOT_COMPLETED`.
-- Optional: a local `VpnService` DNS filter to block the *websites* of bricked
+- Optional: a local `VpnService` DNS filter to block the *websites* of locked
   apps (e.g. instagram.com), since browsers can otherwise bypass app blocking.
 
 > Distribution note: Google Play restricts AccessibilityService use. Plan on
@@ -109,27 +109,27 @@ ML Kit for scanning, ZXing for QR generation.
 ### 4.1 Screens
 1. **Onboarding / permissions**: step-by-step checklist (Accessibility, Device
    Admin, Notifications, Overlay, Camera, NFC on). Each item shows a live ✓.
-2. **Home**: big status card (🧱 *Bricked* / 🟢 *Free*), current mode, time
-   bricked, and buttons "Tap card" / "Scan QR". An NFC tap works from anywhere
+2. **Home**: big status card (🔒 *Locked* / 🔓 *Unlocked*), current mode, time
+   locked, and buttons "Tap card" / "Scan QR". An NFC tap works from anywhere
    in the app.
 3. **Keys**: list of paired keys (name, type, date added). Add, rename,
-   remove, and rotate. You can only remove keys while unbricked.
+   remove, and rotate. You can only remove keys while unlocked.
 4. **Modes**: create or edit a mode. Choose between a block list and an allow
    list, using a searchable app picker with icons.
-5. **Schedules** (v2): e.g. "Auto-brick 22:00–07:00; tap key to end early".
-6. **Blocked-app overlay**: shown when you open a bricked app. Includes a
+5. **Schedules** (v2): e.g. "Auto-lock 22:00–07:00; tap key to end early".
+6. **Blocked-app overlay**: shown when you open a locked app. Includes a
    friendly message, time remaining or elapsed, "Go Home", and a small
-   "Emergency unbrick" link.
-7. **Emergency unbrick**: shows how many you have left (e.g. 3/5). Optionally
+   "Emergency unlock" link.
+7. **Emergency unlock**: shows how many you have left (e.g. 3/5). Optionally
    makes you wait 10 minutes or type a long phrase first.
-8. **Stats** (v2): time bricked per day, blocked-open attempts, streaks.
+8. **Stats** (v2): time locked per day, blocked-open attempts, streaks.
 9. **Settings**: strictness, emergency count, website blocking, export/backup
    (keys are excluded), about.
 
 ### 4.2 Module layout
 ```
 app/                  # Compose UI, navigation, DI wiring
-core/model/           # Mode, Key, BrickSession, AppRule
+core/model/           # Mode, Key, LockSession, AppRule
 core/data/            # Room DB, DataStore, repositories
 core/security/        # hashing, salt, key validation, tamper checks
 feature/nfc/          # reader mode, pairing, UID-stability check, NDEF write
@@ -141,10 +141,10 @@ feature/service/      # foreground service, boot receiver, schedule alarms
 
 ### 4.3 Core state machine
 ```
-          tap/scan valid key                     tap/scan valid key
- FREE ───────────────────────────▶ BRICKED ───────────────────────────▶ FREE
-                                     │  emergency unbrick (count--)
-                                     └───────────────────────────────▶ FREE
+             tap/scan valid key                 tap/scan valid key
+ UNLOCKED ───────────────────────▶ LOCKED ───────────────────────▶ UNLOCKED
+                                     │  emergency unlock (wait, then count--)
+                                     └───────────────────────────▶ UNLOCKED
 ```
 - State is persisted (Room) so it survives reboots and process kills.
 - Every transition is logged (for stats and debugging).
@@ -158,14 +158,14 @@ feature/service/      # foreground service, boot receiver, schedule alarms
 
 ---
 
-## 5. Optional physical build (a "brick" of your own)
+## 5. Optional physical build (a lock key of your own)
 
 If you'd rather have a dedicated object than a random card:
 - **Easiest:** an NTAG215 sticker or coin tag stuck under a 3D-printed or wooden
   block, or glued inside an old card holder. Cost is under $2.
 - **Recycle:** any old hotel key, transit card, or badge. Mount it on the wall
   by the door with a command strip.
-- **QR "brick":** laminate the printed QR code and fix it somewhere you have to
+- **QR key:** laminate the printed QR code and fix it somewhere you have to
   walk to.
 - No electronics, batteries, or firmware needed. The phone does all the work.
 
@@ -177,9 +177,9 @@ If you'd rather have a dedicated object than a random card:
 |---|---|---|
 | M0 | Project skeleton | Gradle multi-module, Compose app, CI (build + unit tests + lint) |
 | M1 | Key pairing | NFC UID pairing with random-UID detection; QR generate, print, and scan; hashed storage |
-| M2 | Brick state machine | Persisted FREE/BRICKED state, foreground service, boot re-arm |
+| M2 | Lock state machine | Persisted UNLOCKED/LOCKED state, foreground service, boot re-arm |
 | M3 | Blocking (tier A) | AccessibilityService + overlay + mode app picker |
-| M4 | Hardening | Device Admin, settings/uninstall page blocking, emergency unbricks |
+| M4 | Hardening | Device Admin, settings/uninstall page blocking, emergency unlocks |
 | M5 | Polish + release | Onboarding checklist, stats, signed APK on GitHub Releases |
 | M6 (v2) | Extras | Schedules, strict Device Owner mode, website blocking via VPN, NDEF secrets |
 
@@ -196,7 +196,7 @@ If you'd rather have a dedicated object than a random card:
   (transit), DESFire (badges), a bank card (must be *rejected*), a phone wallet
   (must be *rejected*).
 - **Cheat tests:** reboot, force-stop, disable accessibility, uninstall, change
-  the clock, and airplane mode. Each should leave the phone bricked or be blocked.
+  the clock, and airplane mode. Each should leave the phone locked or be blocked.
 
 ---
 
@@ -209,6 +209,6 @@ If you'd rather have a dedicated object than a random card:
 - **Play Store policy** on accessibility means sideloading first.
 - **Decisions (v1 defaults):**
   1. One key unlocks every mode. Keys are not tied to specific modes.
-  2. 5 emergency unbricks, which never refill.
+  2. 5 emergency unlocks, which never refill.
   3. Website blocking (VPN) is out of scope for v1.
   4. Strict Device Owner mode is deferred to v2.

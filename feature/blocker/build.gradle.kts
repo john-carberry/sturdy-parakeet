@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diybrick.feature.blocker"
+    namespace = "com.livefree.feature.blocker"
     compileSdk = 35
 
     defaultConfig {

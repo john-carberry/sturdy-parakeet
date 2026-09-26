@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.diybrick.feature.service"
+    namespace = "com.livefree.feature.service"
     compileSdk = 35
 
     defaultConfig {
