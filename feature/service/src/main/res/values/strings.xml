@@ -1,0 +1,6 @@
+<resources>
+    <string name="brick_channel_name">Brick status</string>
+    <string name="brick_channel_description">Shows while your phone is bricked</string>
+    <string name="brick_notification_title">🧱 Bricked</string>
+    <string name="brick_notification_text">Tap your key to unbrick</string>
+</resources>

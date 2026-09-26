@@ -25,6 +25,11 @@ data class Mode(
         ListType.BLOCK -> packageName in packages
         ListType.ALLOW -> packageName !in packages
     }
+
+    companion object {
+        /** The single mode used until mode editing arrives in M3. */
+        const val DEFAULT_ID = 1L
+    }
 }
 
 enum class EndReason { KEY, EMERGENCY, SCHEDULE }

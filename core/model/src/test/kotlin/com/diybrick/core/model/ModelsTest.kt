@@ -24,7 +24,7 @@ class ModelsTest {
     fun defaultSettingsMatchPlan() {
         val s = BrickSettings()
         assertTrue(s.anyKeyUnlocksAllModes)
-        assertEquals(5, s.emergencyUnbricksRemaining)
+        assertEquals(5, s.emergencyUnbricks)
         assertEquals(EmergencyRefill.NEVER, s.emergencyRefill)
         assertFalse(s.websiteBlocking)
         assertFalse(s.strictMode)

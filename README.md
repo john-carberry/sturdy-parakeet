@@ -14,6 +14,7 @@ See [PLAN.md](PLAN.md) for the full design and milestones.
 | `core/data/` | Room database of paired keys (hashes only) |
 | `feature/nfc/` | NFC reader mode and tag routing to screens |
 | `feature/qr/` | QR generation and printing (ZXing), scanning (CameraX + ML Kit) |
+| `feature/service/` | "Bricked" notification service and reboot/update receiver |
 
 ## Build
 
@@ -30,15 +31,17 @@ push, and uploads the APK as a build artifact.
 ## Using it (so far)
 
 1. Open **Manage keys** and add an NFC card (tap it twice) or a QR code (print it, then save).
-2. Back on the home screen, tap a card or scan the QR code to check it's recognised.
+2. Back on the home screen, tap a paired card or scan your QR code to brick the phone.
+   Do it again to unbrick. A "Bricked" notification with a timer shows meanwhile.
+3. Stuck without your key? Use one of your 5 emergency unbricks (they don't refill).
 
-Bricking itself arrives in M2 and M3.
+Keys can't be added or removed while bricked. Blocking apps arrives in M3.
 
 ## Status
 
 - [x] M0 — project skeleton, CI
 - [x] M1 — key pairing (NFC card + QR code)
-- [ ] M2 — brick state machine and background service
+- [x] M2 — brick state machine and background service
 - [ ] M3 — app blocking
 - [ ] M4 — hardening and emergency unbricks
 - [ ] M5 — polish and first release

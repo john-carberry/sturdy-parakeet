@@ -29,7 +29,7 @@ fun DiyBrickNavHost() {
     NavHost(navController = nav, startDestination = Routes.HOME) {
         composable(Routes.HOME) {
             HomeScreen(
-                viewModel = appViewModel { HomeViewModel(it.keyRepository) },
+                viewModel = appViewModel { HomeViewModel(it.keyRepository, it.brickRepository) },
                 onScanQr = { nav.navigate(Routes.CHECK_QR) },
                 onManageKeys = { nav.navigate(Routes.KEYS) },
             )
@@ -37,9 +37,11 @@ fun DiyBrickNavHost() {
         composable(Routes.CHECK_QR) { entry ->
             // The result goes to the home screen's ViewModel, which shows it after we pop.
             val homeEntry = remember(entry) { nav.getBackStackEntry(Routes.HOME) }
-            val homeViewModel = appViewModel(owner = homeEntry) { HomeViewModel(it.keyRepository) }
+            val homeViewModel = appViewModel(owner = homeEntry) {
+                HomeViewModel(it.keyRepository, it.brickRepository)
+            }
             ScanQrScreen(
-                title = "Check a QR key",
+                title = "Scan your QR key",
                 onScanned = {
                     homeViewModel.onQrScanned(it)
                     nav.popBackStack()
@@ -49,7 +51,7 @@ fun DiyBrickNavHost() {
         }
         composable(Routes.KEYS) {
             KeysScreen(
-                viewModel = appViewModel { KeysViewModel(it.keyRepository) },
+                viewModel = appViewModel { KeysViewModel(it.keyRepository, it.brickRepository) },
                 onAddNfc = { nav.navigate(Routes.PAIR_NFC) },
                 onAddQr = { nav.navigate(Routes.CREATE_QR) },
                 onBack = { nav.popBackStack() },

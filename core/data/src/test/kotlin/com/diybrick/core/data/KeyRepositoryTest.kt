@@ -14,7 +14,13 @@ import org.junit.Test
 
 class KeyRepositoryTest {
     private val dao = FakeKeyDao()
-    private val repo = KeyRepository(dao, KeyHasher(ByteArray(32) { it.toByte() }), clock = { 1000L })
+    private var locked = false
+    private val repo = KeyRepository(
+        dao,
+        KeyHasher(ByteArray(32) { it.toByte() }),
+        clock = { 1000L },
+        isLocked = { locked },
+    )
     private val uid = byteArrayOf(0x04, 0x11, 0x22, 0x33)
 
     @Test
@@ -45,6 +51,15 @@ class KeyRepositoryTest {
         val added = repo.add(KeyType.QR, "Fridge", ByteArray(32)) as KeyRepository.AddResult.Added
         repo.remove(added.key.id)
         assertTrue(repo.keys.first().isEmpty())
+    }
+
+    @Test
+    fun keysCannotChangeWhileLocked() = runBlocking {
+        val added = repo.add(KeyType.QR, "Fridge", ByteArray(32)) as KeyRepository.AddResult.Added
+        locked = true
+        assertEquals(KeyRepository.AddResult.Locked, repo.add(KeyType.NFC_UID, "Card", uid))
+        assertFalse(repo.remove(added.key.id))
+        assertEquals(1, dao.rows.value.size)
     }
 }
 

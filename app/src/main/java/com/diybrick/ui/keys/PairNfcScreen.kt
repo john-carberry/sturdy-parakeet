@@ -60,6 +60,11 @@ fun PairNfcScreen(viewModel: PairNfcViewModel, onDone: () -> Unit) {
                 NfcStatus.READY -> Unit
             }
 
+            if (viewModel.saveResult == PairNfcViewModel.SaveResult.Locked) {
+                Text("Keys can't be added while your phone is bricked.")
+                return@Column
+            }
+
             (viewModel.saveResult as? PairNfcViewModel.SaveResult.AlreadyPaired)?.let {
                 Text("This card is already paired as “${it.label}”.")
                 OutlinedButton(onClick = viewModel::restart) { Text("Use a different card") }

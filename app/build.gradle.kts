@@ -12,8 +12,8 @@ android {
         applicationId = "com.diybrick"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     buildTypes {
@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":feature:nfc"))
     implementation(project(":feature:qr"))
+    implementation(project(":feature:service"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

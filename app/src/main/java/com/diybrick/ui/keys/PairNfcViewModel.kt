@@ -15,6 +15,7 @@ class PairNfcViewModel(private val keys: KeyRepository) : ViewModel() {
     sealed interface SaveResult {
         data object Saved : SaveResult
         data class AlreadyPaired(val label: String) : SaveResult
+        data object Locked : SaveResult
     }
 
     private val pairing = NfcPairing()
@@ -47,6 +48,7 @@ class PairNfcViewModel(private val keys: KeyRepository) : ViewModel() {
             saveResult = when (result) {
                 is KeyRepository.AddResult.Added -> SaveResult.Saved
                 is KeyRepository.AddResult.AlreadyPaired -> SaveResult.AlreadyPaired(result.existing.label)
+                KeyRepository.AddResult.Locked -> SaveResult.Locked
             }
             saving = false
         }

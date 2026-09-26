@@ -10,15 +10,19 @@ class KeyRepository internal constructor(
     private val dao: KeyDao,
     private val hasher: KeyHasher,
     private val clock: () -> Long = System::currentTimeMillis,
+    /** True while bricked; keys can't be added or removed then (no minting a way out). */
+    private val isLocked: suspend () -> Boolean = { false },
 ) {
     sealed interface AddResult {
         data class Added(val key: Key) : AddResult
         data class AlreadyPaired(val existing: Key) : AddResult
+        data object Locked : AddResult
     }
 
     val keys: Flow<List<Key>> = dao.observeAll().map { list -> list.map { it.toModel() } }
 
     suspend fun add(type: KeyType, label: String, secret: ByteArray): AddResult {
+        if (isLocked()) return AddResult.Locked
         find(type, secret)?.let { return AddResult.AlreadyPaired(it) }
         val entity = KeyEntity(
             type = type.name,
@@ -36,5 +40,10 @@ class KeyRepository internal constructor(
             .firstOrNull { hasher.matches(secret, it.secretHash) }
             ?.toModel()
 
-    suspend fun remove(id: Long) = dao.delete(id)
+    /** Returns false if keys are locked because the phone is bricked. */
+    suspend fun remove(id: Long): Boolean {
+        if (isLocked()) return false
+        dao.delete(id)
+        return true
+    }
 }

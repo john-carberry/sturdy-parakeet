@@ -41,6 +41,7 @@ fun KeysScreen(
     onBack: () -> Unit,
 ) {
     val keys by viewModel.all.collectAsStateWithLifecycle()
+    val locked by viewModel.locked.collectAsStateWithLifecycle()
     var pendingRemoval by remember { mutableStateOf<Key?>(null) }
 
     Scaffold(topBar = { BackTopBar("Keys", onBack) }) { padding ->
@@ -61,7 +62,7 @@ fun KeysScreen(
                     }
                 }
                 items(list, key = { it.id }) { key ->
-                    KeyRow(key, onRemove = { pendingRemoval = key })
+                    KeyRow(key, removable = !locked, onRemove = { pendingRemoval = key })
                     HorizontalDivider()
                 }
             }
@@ -69,10 +70,13 @@ fun KeysScreen(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Button(onClick = onAddNfc, modifier = Modifier.fillMaxWidth()) {
+                if (locked) {
+                    Text("Keys can't be added or removed while your phone is bricked.")
+                }
+                Button(onClick = onAddNfc, enabled = !locked, modifier = Modifier.fillMaxWidth()) {
                     Text("Add NFC card")
                 }
-                OutlinedButton(onClick = onAddQr, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = onAddQr, enabled = !locked, modifier = Modifier.fillMaxWidth()) {
                     Text("Add QR code")
                 }
             }
@@ -98,7 +102,7 @@ fun KeysScreen(
 }
 
 @Composable
-private fun KeyRow(key: Key, onRemove: () -> Unit) {
+private fun KeyRow(key: Key, removable: Boolean, onRemove: () -> Unit) {
     val kind = when (key.type) {
         KeyType.NFC_UID, KeyType.NFC_NDEF -> "📇 NFC card"
         KeyType.QR -> "🔳 QR code"
@@ -108,7 +112,7 @@ private fun KeyRow(key: Key, onRemove: () -> Unit) {
         headlineContent = { Text(key.label) },
         supportingContent = { Text("$kind · added $added") },
         trailingContent = {
-            IconButton(onClick = onRemove) {
+            IconButton(onClick = onRemove, enabled = removable) {
                 Icon(Icons.Default.Delete, contentDescription = "Remove ${key.label}")
             }
         },

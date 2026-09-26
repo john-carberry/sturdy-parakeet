@@ -8,7 +8,8 @@ enum class EmergencyRefill { NEVER, MONTHLY }
 data class BrickSettings(
     /** Any paired key unlocks every mode (keys aren't bound to specific modes). */
     val anyKeyUnlocksAllModes: Boolean = true,
-    val emergencyUnbricksRemaining: Int = DEFAULT_EMERGENCY_UNBRICKS,
+    /** How many emergency unbricks you get in total (they never refill by default). */
+    val emergencyUnbricks: Int = DEFAULT_EMERGENCY_UNBRICKS,
     val emergencyRefill: EmergencyRefill = EmergencyRefill.NEVER,
     /** VPN-based website blocking; out of scope for v1. */
     val websiteBlocking: Boolean = false,
