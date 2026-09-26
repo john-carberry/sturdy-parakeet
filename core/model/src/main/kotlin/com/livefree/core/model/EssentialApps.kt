@@ -3,6 +3,7 @@ package com.livefree.core.model
 /** Why an app can never be blocked: the phone has to keep working while locked. */
 enum class EssentialReason(val description: String) {
     THIS_APP("Needed to unlock"),
+    SECURITY("Screen lock, fingerprint and face unlock"),
     PHONE("Calls always work"),
     MESSAGES("Texts and verification codes"),
     CONTACTS("Needed for calls and texts"),
@@ -26,6 +27,23 @@ object EssentialApps {
         "com.android.permissioncontroller" to EssentialReason.SYSTEM,
         "com.google.android.permissioncontroller" to EssentialReason.SYSTEM,
         "com.android.settings" to EssentialReason.SETTINGS,
+        // The phone's own lock screen and biometric prompts, which some makers ship as
+        // separate apps. Live Free must never touch these.
+        "com.android.keyguard" to EssentialReason.SECURITY,
+        "com.android.systemui.biometrics" to EssentialReason.SECURITY,
+        "com.google.android.settings.intelligence" to EssentialReason.SECURITY,
+        "com.google.android.apps.faceunlock" to EssentialReason.SECURITY,
+        "com.samsung.android.biometrics.app.setting" to EssentialReason.SECURITY,
+        "com.samsung.android.bio.face.service" to EssentialReason.SECURITY,
+        "com.samsung.android.app.aodservice" to EssentialReason.SECURITY,
+        "com.samsung.android.dynamiclock" to EssentialReason.SECURITY,
+        "com.miui.face" to EssentialReason.SECURITY,
+        "com.miui.securitycenter" to EssentialReason.SECURITY,
+        "com.oneplus.faceunlock" to EssentialReason.SECURITY,
+        "com.oplus.faceunlock" to EssentialReason.SECURITY,
+        "com.coloros.fingerprint" to EssentialReason.SECURITY,
+        "com.motorola.faceunlock" to EssentialReason.SECURITY,
+        "com.huawei.systemmanager" to EssentialReason.SECURITY,
         "com.android.phone" to EssentialReason.PHONE,
         "com.android.server.telecom" to EssentialReason.PHONE,
         "com.android.dialer" to EssentialReason.PHONE,

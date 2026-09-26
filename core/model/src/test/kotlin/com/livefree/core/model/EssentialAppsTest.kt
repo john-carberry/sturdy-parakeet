@@ -18,6 +18,7 @@ class EssentialAppsTest {
     fun coreFunctionsAreKnownEssentials() {
         val reasons = EssentialApps.KNOWN.values.toSet()
         listOf(
+            EssentialReason.SECURITY,
             EssentialReason.PHONE,
             EssentialReason.MESSAGES,
             EssentialReason.CONTACTS,
@@ -31,8 +32,9 @@ class EssentialAppsTest {
     fun essentialAppsAreNeverBlockedEvenInAllowMode() {
         val allowNothing = Mode(Mode.DEFAULT_ID, "Focus", ListType.ALLOW, emptySet())
         val locked = LockState.Locked(Mode.DEFAULT_ID, since = 0L)
-        EssentialApps.KNOWN.keys.forEach {
-            assertFalse(it, BlockPolicy.shouldBlock(it, locked, allowNothing, EssentialApps.KNOWN.keys))
+        val essential = EssentialApps.KNOWN.keys
+        essential.forEach {
+            assertFalse(it, BlockPolicy.shouldBlock(it, locked, allowNothing, essential, screenLocked = false))
         }
     }
 }

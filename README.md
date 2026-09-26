@@ -55,7 +55,9 @@ push, and uploads the APK as a build artifact.
    It unlocks after a 10-minute wait and must then be used within 5 minutes.
 
 While locked, opening a blocked app sends you Home and shows "This app is locked".
-Calls, messages, alarms, the keyboard, the launcher and Settings always work. Keys and
+The phone's own lock screen, PIN pad and fingerprint/face unlock are never touched:
+Live Free stands down whenever the screen is locked or off. Calls, messages, alarms,
+the keyboard, the launcher and Settings always work. Keys and
 blocked apps can't be changed while locked, and Live Free's own Settings pages (its
 accessibility switch, App info, device admin, uninstall) are closed while locked.
 

@@ -8,7 +8,13 @@ object BlockPolicy {
         mode: Mode,
         /** Apps that must always work: this app, the launcher, dialer, keyboard, system UI. */
         exempt: Set<String>,
-    ): Boolean = state is LockState.Locked &&
+        /**
+         * The phone's own screen lock is showing (or the screen is off). Live Free never
+         * acts then: the lock screen, its biometric prompts and the PIN pad are off limits.
+         */
+        screenLocked: Boolean,
+    ): Boolean = !screenLocked &&
+        state is LockState.Locked &&
         packageName !in exempt &&
         mode.isBlocked(packageName)
 }
