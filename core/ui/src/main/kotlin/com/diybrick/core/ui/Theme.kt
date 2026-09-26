@@ -19,3 +19,10 @@ fun DiyBrickTheme(content: @Composable () -> Unit) {
     }
     MaterialTheme(colorScheme = colors, content = content)
 }
+
+/**
+ * The one hue for single-series charts. Validated with the dataviz palette checks
+ * against each theme's surface; the dark theme's primary is too pale for marks.
+ */
+@Composable
+fun chartSeriesColor(): Color = if (isSystemInDarkTheme()) Color(0xFFE06A4F) else Color(0xFFB5462F)

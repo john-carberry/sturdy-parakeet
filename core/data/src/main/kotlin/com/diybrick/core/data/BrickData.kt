@@ -20,6 +20,8 @@ class BrickData private constructor(context: Context) {
 
     val modes = ModeRepository(database.modeDao(), isLocked = isBricked)
 
+    val stats = StatsRepository(database.sessionDao(), database.blockEventDao())
+
     companion object {
         @Volatile
         private var instance: BrickData? = null

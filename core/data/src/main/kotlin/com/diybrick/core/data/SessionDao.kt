@@ -13,6 +13,9 @@ internal interface SessionDao {
     @Query("SELECT * FROM sessions WHERE endedAt IS NULL ORDER BY startedAt DESC LIMIT 1")
     suspend fun getOpen(): SessionEntity?
 
+    @Query("SELECT * FROM sessions ORDER BY startedAt")
+    fun observeAll(): Flow<List<SessionEntity>>
+
     @Insert
     suspend fun insert(session: SessionEntity): Long
 

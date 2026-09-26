@@ -8,17 +8,35 @@ android {
     namespace = "com.diybrick"
     compileSdk = 35
 
+    // Live Free's signing key comes from environment variables (GitHub secrets in the
+    // release workflow), never from the repository. Without them, release builds are
+    // unsigned and debug builds use this machine's debug key.
+    val keystoreFile = System.getenv("LIVEFREE_KEYSTORE_FILE")?.let(::file)?.takeIf { it.exists() }
+    val liveFreeSigning = keystoreFile?.let {
+        signingConfigs.create("liveFree") {
+            storeFile = it
+            storePassword = System.getenv("LIVEFREE_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("LIVEFREE_KEY_ALIAS")
+            keyPassword = System.getenv("LIVEFREE_KEY_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.diybrick"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.4.1"
+        versionCode = 8
+        versionName = "0.5.0"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = liveFreeSigning
+        }
+        debug {
+            // Same key as releases when available, so either can update the other.
+            liveFreeSigning?.let { signingConfig = it }
         }
     }
 

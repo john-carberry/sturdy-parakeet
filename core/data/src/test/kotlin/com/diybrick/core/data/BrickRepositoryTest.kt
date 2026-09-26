@@ -108,6 +108,8 @@ private class FakeSessionDao : SessionDao {
 
     override fun observeOpen(): Flow<SessionEntity?> = rows.map(::open)
 
+    override fun observeAll(): Flow<List<SessionEntity>> = rows
+
     override suspend fun getOpen() = open(rows.value)
 
     override suspend fun insert(session: SessionEntity): Long {

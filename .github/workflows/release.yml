@@ -1,0 +1,70 @@
+name: Release
+
+# Push a tag like v0.5.0 to build a signed release and publish it on GitHub Releases.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No keys or personal files committed
+        run: scripts/check-no-secrets.sh
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Load signing key from secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.LIVEFREE_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Add the LIVEFREE_* signing secrets first (see README, Releases)."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/livefree.keystore"
+          echo "LIVEFREE_KEYSTORE_FILE=$RUNNER_TEMP/livefree.keystore" >> "$GITHUB_ENV"
+
+      - name: Test and build signed release
+        env:
+          LIVEFREE_KEYSTORE_PASSWORD: ${{ secrets.LIVEFREE_KEYSTORE_PASSWORD }}
+          LIVEFREE_KEY_ALIAS: ${{ secrets.LIVEFREE_KEY_ALIAS }}
+          LIVEFREE_KEY_PASSWORD: ${{ secrets.LIVEFREE_KEY_PASSWORD }}
+        run: ./gradlew test assembleRelease --stacktrace
+
+      - name: Name the APKs
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir dist
+          for apk in app/build/outputs/apk/release/app-*-release.apk; do
+            abi=$(basename "$apk" | sed -E 's/^app-(.*)-release\.apk$/\1/')
+            cp "$apk" "dist/live-free-$version-$abi.apk"
+          done
+          ls -la dist
+
+      - name: Check the APKs are signed
+        run: |
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          for apk in dist/*.apk; do "$apksigner" verify "$apk"; done
+
+      - name: Remove the signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/livefree.keystore"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.apk
+          generate_release_notes: true
+          body: |
+            Install **live-free-…-arm64-v8a.apk** on most phones (or the universal APK if unsure).
+            It updates an existing install and keeps your paired keys.

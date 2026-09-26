@@ -65,6 +65,8 @@ fun HomeScreen(
     onManageKeys: () -> Unit,
     onChooseApps: () -> Unit,
     onSetUpBlocker: () -> Unit,
+    onStats: () -> Unit,
+    onSetupChecklist: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val keyCount by viewModel.keyCount.collectAsStateWithLifecycle()
@@ -139,6 +141,10 @@ fun HomeScreen(
                     OutlinedButton(onClick = onManageKeys, modifier = Modifier.fillMaxWidth()) {
                         Text("Manage keys")
                     }
+                    OutlinedButton(onClick = onStats, modifier = Modifier.fillMaxWidth()) {
+                        Text("Your stats")
+                    }
+                    TextButton(onClick = onSetupChecklist) { Text("Setup checklist") }
                 }
             }
 

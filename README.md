@@ -51,6 +51,24 @@ Settings › Security › Device admin apps, then uninstall as usual.
 Known limits: Safe Mode disables third-party accessibility services, and the Settings
 guard matches English button text.
 
+## Releases
+
+Pushing a tag like `v0.5.0` runs `.github/workflows/release.yml`, which tests, builds
+signed APKs and publishes them on GitHub Releases. The signing key is never in the
+repository; the workflow reads it from four repository secrets
+(Settings › Secrets and variables › Actions):
+
+| Secret | Value |
+|---|---|
+| `LIVEFREE_KEYSTORE_BASE64` | the keystore file, base64-encoded |
+| `LIVEFREE_KEYSTORE_PASSWORD` | keystore password |
+| `LIVEFREE_KEY_ALIAS` | key alias |
+| `LIVEFREE_KEY_PASSWORD` | key password |
+
+Builds on any machine use the same key when `LIVEFREE_KEYSTORE_FILE` and the three
+password/alias variables are set. Android only updates an app signed with the same
+key, so keep a safe copy: losing it means uninstalling (and re-pairing keys) to update.
+
 ## Privacy: where your keys live
 
 - Card IDs and QR secrets never leave your phone. The app stores only a salted
@@ -70,4 +88,4 @@ guard matches English button text.
 - [x] M2 — brick state machine and background service
 - [x] M3 — app blocking
 - [x] M4 — hardening and emergency unbricks
-- [ ] M5 — polish and first release
+- [x] M5 — polish and first release (setup checklist, stats, signed GitHub Releases)

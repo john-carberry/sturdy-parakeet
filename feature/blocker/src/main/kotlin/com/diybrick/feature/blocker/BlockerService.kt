@@ -59,7 +59,7 @@ class BlockerService : AccessibilityService() {
         when (event.eventType) {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
                 foregroundPackage = packageName
-                blockIfNeeded(packageName)
+                blockIfNeeded(packageName, isNewOpen = true)
                 guardSettings(packageName, force = true)
             }
             // Settings often swaps pages without a new window, so watch its content too.
@@ -112,13 +112,14 @@ class BlockerService : AccessibilityService() {
     }
 
     /** Every launch of a blocked app is closed, however quickly it's reopened. */
-    private fun blockIfNeeded(packageName: String) {
+    private fun blockIfNeeded(packageName: String, isNewOpen: Boolean) {
         val mode = mode ?: return
         val bricked = state as? BrickState.Bricked ?: return
         if (!BlockPolicy.shouldBlock(packageName, bricked, mode, exempt)) return
 
         performGlobalAction(GLOBAL_ACTION_HOME)
         startActivity(BlockedActivity.intent(this, packageName, mode.listType, bricked.since))
+        if (isNewOpen) scope.launch { BrickData.get(this@BlockerService).stats.recordBlockedOpen(packageName) }
         if (messages.shouldShow(packageName)) {
             // Some phones stop background services from opening screens; the toast still explains.
             val label = AppLabels.of(this, packageName)
@@ -132,7 +133,7 @@ class BlockerService : AccessibilityService() {
         RECHECK_DELAYS_MS.forEach { delay ->
             HandlerCompat.postDelayed(
                 handler,
-                { if (foregroundPackage == packageName) blockIfNeeded(packageName) },
+                { if (foregroundPackage == packageName) blockIfNeeded(packageName, isNewOpen = false) },
                 RECHECK_TOKEN,
                 delay,
             )

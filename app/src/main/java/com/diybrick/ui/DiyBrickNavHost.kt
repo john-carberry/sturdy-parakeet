@@ -2,6 +2,8 @@ package com.diybrick.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.diybrick.DiyBrickApp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,6 +20,10 @@ import com.diybrick.ui.modes.ModeScreen
 import com.diybrick.ui.modes.ModeViewModel
 import com.diybrick.ui.scan.ScanQrScreen
 import com.diybrick.ui.scan.TapCardScreen
+import com.diybrick.ui.setup.SetupScreen
+import com.diybrick.ui.setup.SetupViewModel
+import com.diybrick.ui.stats.StatsScreen
+import com.diybrick.ui.stats.StatsViewModel
 
 private object Routes {
     const val HOME = "home"
@@ -28,12 +34,36 @@ private object Routes {
     const val CREATE_QR = "create_qr"
     const val MODE = "mode"
     const val BLOCKER_SETUP = "blocker_setup"
+    const val SETUP = "setup"
+    const val STATS = "stats"
 }
 
 @Composable
 fun DiyBrickNavHost() {
     val nav = rememberNavController()
-    NavHost(navController = nav, startDestination = Routes.HOME) {
+    val container = (LocalContext.current.applicationContext as DiyBrickApp).container
+    // First run starts on the setup checklist; after that, straight to home.
+    val start = remember { if (container.onboarding.done) Routes.HOME else Routes.SETUP }
+    NavHost(navController = nav, startDestination = start) {
+        composable(Routes.SETUP) {
+            SetupScreen(
+                viewModel = appViewModel { SetupViewModel(it.keyRepository, it.modeRepository, it.onboarding) },
+                onPairKey = { nav.navigate(Routes.KEYS) },
+                onChooseApps = { nav.navigate(Routes.MODE) },
+                onProtection = { nav.navigate(Routes.BLOCKER_SETUP) },
+                onFinish = {
+                    if (!nav.popBackStack(Routes.HOME, inclusive = false)) {
+                        nav.navigate(Routes.HOME) { popUpTo(Routes.SETUP) { inclusive = true } }
+                    }
+                },
+            )
+        }
+        composable(Routes.STATS) {
+            StatsScreen(
+                viewModel = appViewModel { StatsViewModel(it.statsRepository) },
+                onBack = { nav.popBackStack() },
+            )
+        }
         composable(Routes.HOME) {
             HomeScreen(
                 viewModel = appViewModel {
@@ -45,6 +75,8 @@ fun DiyBrickNavHost() {
                 onManageKeys = { nav.navigate(Routes.KEYS) },
                 onChooseApps = { nav.navigate(Routes.MODE) },
                 onSetUpBlocker = { nav.navigate(Routes.BLOCKER_SETUP) },
+                onStats = { nav.navigate(Routes.STATS) },
+                onSetupChecklist = { nav.navigate(Routes.SETUP) },
             )
         }
         composable(Routes.CHECK_QR) { entry ->
