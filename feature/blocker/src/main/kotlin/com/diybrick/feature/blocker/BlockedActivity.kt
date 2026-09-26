@@ -66,7 +66,7 @@ class BlockedActivity : ComponentActivity() {
                             Text("Go home")
                         }
                         OutlinedButton(onClick = ::openDiyBrick, modifier = Modifier.fillMaxWidth()) {
-                            Text("Open DIY Brick")
+                            Text("Open Live Free")
                         }
                     }
                 }
@@ -105,10 +105,10 @@ class BlockedActivity : ComponentActivity() {
         val appLabel: String,
         val listType: ListType,
         val since: Long?,
-        /** Closed a Settings screen that could switch DIY Brick off, rather than an app. */
+        /** Closed a Settings screen that could switch Live Free off, rather than an app. */
         val tamper: Boolean,
     ) {
-        fun title(): String = if (tamper) "DIY Brick settings are locked" else "$appLabel was closed"
+        fun title(): String = if (tamper) "Live Free settings are locked" else "$appLabel was closed"
 
         fun nextStep(): String = if (tamper) {
             "Tap your key to unbrick first, then you can change these settings."
@@ -121,7 +121,7 @@ class BlockedActivity : ComponentActivity() {
                 ?.let { "Your phone has been bricked since ${timeFormat.format(Date(it))}" }
                 ?: "Your phone is bricked"
             if (tamper) {
-                return "$bricked, so DIY Brick can't be switched off, force stopped or uninstalled."
+                return "$bricked, so Live Free can't be switched off, force stopped or uninstalled."
             }
             return when (listType) {
                 ListType.BLOCK -> "$bricked, and $appLabel is on your list of apps to block."

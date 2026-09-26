@@ -26,7 +26,7 @@ class CreateQrViewModel(private val keys: KeyRepository) : ViewModel() {
         private set
 
     val caption: String
-        get() = "DIY Brick key · ${label.ifBlank { DEFAULT_LABEL }}"
+        get() = "Live Free key · ${label.ifBlank { DEFAULT_LABEL }}"
 
     fun save() {
         if (saving || saved) return

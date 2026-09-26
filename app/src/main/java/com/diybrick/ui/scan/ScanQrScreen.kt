@@ -80,7 +80,7 @@ fun ScanQrScreen(title: String, onScanned: (String) -> Unit, onBack: () -> Unit)
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text("DIY Brick needs the camera to scan your QR key. Images never leave your phone.")
+                    Text("Live Free needs the camera to scan your QR key. Images never leave your phone.")
                     Button(onClick = { requestPermission.launch(Manifest.permission.CAMERA) }) {
                         Text("Allow camera")
                     }

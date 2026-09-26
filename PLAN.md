@@ -1,4 +1,4 @@
-# DIY "Brick" for Android — Project Plan
+# Live Free (DIY "Brick" for Android) — Project Plan
 
 A do-it-yourself alternative to the Brick focus device. Instead of buying their
 NFC puck, you "brick" and "unbrick" your phone by tapping a **card you already

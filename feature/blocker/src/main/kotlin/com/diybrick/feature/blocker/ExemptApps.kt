@@ -16,7 +16,7 @@ import com.diybrick.core.model.EssentialReason
 
 /**
  * Apps that are never blocked, even in allow-list mode, so the phone keeps working
- * and you can always get back to DIY Brick to unbrick. Combines the well-known list
+ * and you can always get back to Live Free to unbrick. Combines the well-known list
  * with this phone's actual defaults.
  */
 object ExemptApps {

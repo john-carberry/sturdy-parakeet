@@ -17,10 +17,12 @@ import com.diybrick.ui.keys.PairNfcViewModel
 import com.diybrick.ui.modes.ModeScreen
 import com.diybrick.ui.modes.ModeViewModel
 import com.diybrick.ui.scan.ScanQrScreen
+import com.diybrick.ui.scan.TapCardScreen
 
 private object Routes {
     const val HOME = "home"
     const val CHECK_QR = "check_qr"
+    const val TAP_CARD = "tap_card"
     const val KEYS = "keys"
     const val PAIR_NFC = "pair_nfc"
     const val CREATE_QR = "create_qr"
@@ -38,6 +40,8 @@ fun DiyBrickNavHost() {
                     HomeViewModel(it.keyRepository, it.brickRepository, it.modeRepository)
                 },
                 onScanQr = { nav.navigate(Routes.CHECK_QR) },
+                onTapCard = { nav.navigate(Routes.TAP_CARD) },
+                onAddCard = { nav.navigate(Routes.PAIR_NFC) },
                 onManageKeys = { nav.navigate(Routes.KEYS) },
                 onChooseApps = { nav.navigate(Routes.MODE) },
                 onSetUpBlocker = { nav.navigate(Routes.BLOCKER_SETUP) },
@@ -53,6 +57,21 @@ fun DiyBrickNavHost() {
                 title = "Scan your QR key",
                 onScanned = {
                     homeViewModel.onQrScanned(it)
+                    nav.popBackStack()
+                },
+                onBack = { nav.popBackStack() },
+            )
+        }
+        composable(Routes.TAP_CARD) { entry ->
+            // Like CHECK_QR: the home screen's ViewModel handles the tap and shows the result.
+            val homeEntry = remember(entry) { nav.getBackStackEntry(Routes.HOME) }
+            val homeViewModel = appViewModel(owner = homeEntry) {
+                HomeViewModel(it.keyRepository, it.brickRepository, it.modeRepository)
+            }
+            TapCardScreen(
+                title = "Tap your card",
+                onTapped = {
+                    homeViewModel.onNfcTag(it)
                     nav.popBackStack()
                 },
                 onBack = { nav.popBackStack() },

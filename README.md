@@ -1,4 +1,4 @@
-# DIY Brick
+# Live Free
 
 An Android app that "bricks" distracting apps until you tap an old NFC card or
 scan a printed QR code. It's a do-it-yourself take on the Brick focus device.
@@ -16,7 +16,7 @@ See [PLAN.md](PLAN.md) for the full design and milestones.
 | `feature/nfc/` | NFC reader mode and tag routing to screens |
 | `feature/qr/` | QR generation and printing (ZXing), scanning (CameraX + ML Kit) |
 | `feature/service/` | "Bricked" notification service and reboot/update receiver |
-| `feature/blocker/` | Accessibility service that blocks apps and guards DIY Brick's Settings pages, uninstall protection (device admin), and the "app was closed" screen |
+| `feature/blocker/` | Accessibility service that blocks apps and guards Live Free's Settings pages, uninstall protection (device admin), and the "app was closed" screen |
 
 ## Build
 
@@ -42,10 +42,10 @@ push, and uploads the APK as a build artifact.
 
 While bricked, opening a blocked app sends you Home and shows "This app is bricked".
 Calls, messages, alarms, the keyboard, the launcher and Settings always work. Keys and
-blocked apps can't be changed while bricked, and DIY Brick's own Settings pages (its
+blocked apps can't be changed while bricked, and Live Free's own Settings pages (its
 accessibility switch, App info, device admin, uninstall) are closed while bricked.
 
-To remove DIY Brick: unbrick, turn off "DIY Brick uninstall protection" under
+To remove Live Free: unbrick, turn off "Live Free uninstall protection" under
 Settings › Security › Device admin apps, then uninstall as usual.
 
 Known limits: Safe Mode disables third-party accessibility services, and the Settings

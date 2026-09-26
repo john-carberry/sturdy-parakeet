@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.diybrick.core.model.BrickRules
 import com.diybrick.core.model.BrickSettings
 import com.diybrick.core.model.BrickState
+import com.diybrick.core.model.KeyType
 import com.diybrick.core.model.ListType
 import com.diybrick.core.model.Mode
 import com.diybrick.feature.blocker.rememberAdminActive
@@ -59,12 +60,15 @@ import java.util.Date
 fun HomeScreen(
     viewModel: HomeViewModel,
     onScanQr: () -> Unit,
+    onTapCard: () -> Unit,
+    onAddCard: () -> Unit,
     onManageKeys: () -> Unit,
     onChooseApps: () -> Unit,
     onSetUpBlocker: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val keyCount by viewModel.keyCount.collectAsStateWithLifecycle()
+    val keyTypes by viewModel.keyTypes.collectAsStateWithLifecycle()
     val emergencyLeft by viewModel.emergencyUnbricksRemaining.collectAsStateWithLifecycle()
     val mode by viewModel.mode.collectAsStateWithLifecycle()
     val blockerEnabled = rememberBlockerEnabled()
@@ -109,18 +113,25 @@ fun HomeScreen(
                 }
                 else -> {
                     val action = if (bricked) "unbrick" else "brick"
-                    when (nfcStatus) {
-                        NfcStatus.READY -> Text(
-                            "Hold a paired card to the back of your phone to $action it.",
-                            textAlign = TextAlign.Center,
-                        )
-                        NfcStatus.DISABLED -> TextButton(
-                            onClick = { context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS)) },
-                        ) { Text("NFC is off. Turn it on to use card keys.") }
-                        NfcStatus.NOT_SUPPORTED -> Unit
+                    val hasCard = keyTypes.any { it == KeyType.NFC_UID || it == KeyType.NFC_NDEF }
+                    when {
+                        nfcStatus == NfcStatus.NOT_SUPPORTED -> Unit
+                        hasCard -> Button(onClick = onTapCard, modifier = Modifier.fillMaxWidth()) {
+                            Text("📇 Tap card to $action")
+                        }
+                        !bricked -> OutlinedButton(onClick = onAddCard, modifier = Modifier.fillMaxWidth()) {
+                            Text("📇 Add a card to lock and unlock with")
+                        }
                     }
-                    Button(onClick = onScanQr, modifier = Modifier.fillMaxWidth()) {
-                        Text("Scan QR key to $action")
+                    if (nfcStatus == NfcStatus.DISABLED && hasCard) {
+                        TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS)) }) {
+                            Text("NFC is off. Turn it on to use your card.")
+                        }
+                    }
+                    if (KeyType.QR in keyTypes) {
+                        Button(onClick = onScanQr, modifier = Modifier.fillMaxWidth()) {
+                            Text("🔳 Scan QR key to $action")
+                        }
                     }
                     OutlinedButton(onClick = onChooseApps, modifier = Modifier.fillMaxWidth()) {
                         Text("Choose apps to block")

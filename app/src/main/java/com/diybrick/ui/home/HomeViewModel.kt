@@ -47,6 +47,11 @@ class HomeViewModel(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** Which kinds of key are paired, e.g. a card and/or a QR code. */
+    val keyTypes: StateFlow<Set<KeyType>> = keys.keys
+        .map { list -> list.map { it.type }.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
     var notice by mutableStateOf<Notice?>(null)
         private set
 
@@ -66,7 +71,7 @@ class HomeViewModel(
             val secret = QrKeyPayload.decode(text)
             val key = secret?.let { keys.find(KeyType.QR, it) }
             when {
-                secret == null -> notice = Notice("That QR code isn't a DIY Brick key.", isError = true)
+                secret == null -> notice = Notice("That QR code isn't a Live Free key.", isError = true)
                 key == null -> notice = Notice(
                     "This QR key isn't paired. It may have been removed.",
                     isError = true,

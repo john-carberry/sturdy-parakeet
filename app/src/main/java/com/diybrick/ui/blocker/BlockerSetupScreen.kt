@@ -44,7 +44,7 @@ fun BlockerSetupScreen(onBack: () -> Unit) {
                 Text("✓ On")
             } else {
                 Text(
-                    "DIY Brick uses an accessibility service to spot when a blocked app opens. " +
+                    "Live Free uses an accessibility service to spot when a blocked app opens. " +
                         "While you're bricked it also reads Settings screens, so the blocker can't " +
                         "be switched off. Nothing leaves your phone.",
                     style = MaterialTheme.typography.bodyLarge,
@@ -64,7 +64,7 @@ fun BlockerSetupScreen(onBack: () -> Unit) {
                 Step(
                     if (Build.VERSION.SDK_INT >= 33) "2. Turn on the blocker" else "Turn on the blocker",
                     "In Accessibility, open “Installed apps” or “Downloaded apps”, choose " +
-                        "“DIY Brick app blocker” and switch it on.",
+                        "“Live Free app blocker” and switch it on.",
                 )
                 Button(
                     onClick = { context.startActivity(BlockerStatus.accessibilitySettingsIntent()) },
@@ -76,10 +76,10 @@ fun BlockerSetupScreen(onBack: () -> Unit) {
 
             Text("Uninstall protection", style = MaterialTheme.typography.headlineSmall)
             if (adminOn) {
-                Text("✓ On. DIY Brick can't be uninstalled while you're bricked.")
+                Text("✓ On. Live Free can't be uninstalled while you're bricked.")
             } else {
                 Text(
-                    "Recommended. Makes DIY Brick a “device admin” app, which Android won't " +
+                    "Recommended. Makes Live Free a “device admin” app, which Android won't " +
                         "uninstall until it's turned off, and that switch is locked while you're " +
                         "bricked. It can't see or change anything else.",
                     style = MaterialTheme.typography.bodyLarge,
@@ -90,7 +90,7 @@ fun BlockerSetupScreen(onBack: () -> Unit) {
                 ) { Text("Turn on uninstall protection") }
             }
             Text(
-                "To remove DIY Brick later: unbrick, turn off “DIY Brick uninstall protection” " +
+                "To remove Live Free later: unbrick, turn off “Live Free uninstall protection” " +
                     "under Settings › Security › Device admin apps, then uninstall as usual.",
                 style = MaterialTheme.typography.bodySmall,
             )

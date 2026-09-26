@@ -8,7 +8,7 @@ import android.os.Looper
 /**
  * Keeps NFC reader mode on while the activity is resumed and hands each tag's UID
  * to the [NfcTagDispatcher]. Reader mode stops Android from opening other apps
- * when a card is tapped while DIY Brick is open.
+ * when a card is tapped while Live Free is open.
  */
 class NfcReader(
     private val activity: Activity,

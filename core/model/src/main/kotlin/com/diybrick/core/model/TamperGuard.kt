@@ -1,7 +1,7 @@
 package com.diybrick.core.model
 
 /**
- * Spots Settings and uninstaller screens that could switch DIY Brick off while the
+ * Spots Settings and uninstaller screens that could switch Live Free off while the
  * phone is bricked: its App info (force stop, uninstall), its accessibility switch,
  * its device-admin page, and the uninstall dialog. Matches on-screen text, so it
  * only knows English wording for the Settings buttons.
@@ -22,9 +22,9 @@ object TamperGuard {
     fun isTamperScreen(
         packageName: String,
         screenText: List<String>,
-        /** This app's name, e.g. "DIY Brick". */
+        /** This app's name, e.g. "Live Free". */
         appLabel: String,
-        /** The accessibility service's name, e.g. "DIY Brick app blocker". */
+        /** The accessibility service's name, e.g. "Live Free app blocker". */
         serviceLabel: String,
     ): Boolean {
         if (packageName !in GUARDED_PACKAGES) return false

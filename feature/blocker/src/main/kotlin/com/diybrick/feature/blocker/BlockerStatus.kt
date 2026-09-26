@@ -38,7 +38,7 @@ object BlockerStatus {
             .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, ComponentName(context, BrickAdminReceiver::class.java))
             .putExtra(
                 DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                "Stops DIY Brick being uninstalled while your phone is bricked. " +
+                "Stops Live Free being uninstalled while your phone is bricked. " +
                     "It can't see or change anything else on your phone.",
             )
 

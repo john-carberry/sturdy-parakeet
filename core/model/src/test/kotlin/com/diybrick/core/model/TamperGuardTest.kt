@@ -6,26 +6,26 @@ import org.junit.Test
 
 class TamperGuardTest {
     private fun check(packageName: String, vararg text: String) =
-        TamperGuard.isTamperScreen(packageName, text.toList(), "DIY Brick", "DIY Brick app blocker")
+        TamperGuard.isTamperScreen(packageName, text.toList(), "Live Free", "Live Free app blocker")
 
     @Test
     fun appInfoForThisAppIsGuarded() {
-        assertTrue(check("com.android.settings", "App info", "DIY Brick", "Open", "Uninstall", "Force stop"))
+        assertTrue(check("com.android.settings", "App info", "Live Free", "Open", "Uninstall", "Force stop"))
     }
 
     @Test
     fun accessibilitySwitchIsGuarded() {
-        assertTrue(check("com.android.settings", "DIY Brick app blocker", "Use DIY Brick app blocker"))
+        assertTrue(check("com.android.settings", "Live Free app blocker", "Use Live Free app blocker"))
     }
 
     @Test
     fun deviceAdminPageIsGuarded() {
-        assertTrue(check("com.android.settings", "DIY Brick", "Deactivate this device admin app"))
+        assertTrue(check("com.android.settings", "Live Free", "Deactivate this device admin app"))
     }
 
     @Test
     fun uninstallDialogIsGuarded() {
-        assertTrue(check("com.google.android.packageinstaller", "DIY Brick", "Do you want to uninstall this app?"))
+        assertTrue(check("com.google.android.packageinstaller", "Live Free", "Do you want to uninstall this app?"))
     }
 
     @Test
@@ -35,11 +35,11 @@ class TamperGuardTest {
 
     @Test
     fun harmlessPagesMentioningUsAreNotGuarded() {
-        assertFalse(check("com.android.settings", "Notifications", "DIY Brick", "Brick status"))
+        assertFalse(check("com.android.settings", "Notifications", "Live Free", "Brick status"))
     }
 
     @Test
     fun otherPackagesAreNeverGuarded() {
-        assertFalse(check("com.example.notes", "DIY Brick", "Uninstall"))
+        assertFalse(check("com.example.notes", "Live Free", "Uninstall"))
     }
 }

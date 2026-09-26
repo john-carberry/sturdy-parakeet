@@ -19,7 +19,7 @@ object QrKeyPayload {
         return PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(secret)
     }
 
-    /** Returns the secret, or null if [text] isn't a DIY Brick key. */
+    /** Returns the secret, or null if [text] isn't a Live Free key. */
     fun decode(text: String): ByteArray? {
         if (!text.startsWith(PREFIX)) return null
         val secret = try {

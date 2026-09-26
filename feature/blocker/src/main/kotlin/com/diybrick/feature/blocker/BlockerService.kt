@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 /**
  * Tier A blocking (PLAN.md §3): when a blocked app comes to the foreground while the
  * phone is bricked, go Home and show [BlockedActivity] explaining why it was closed.
- * While bricked it also closes Settings screens that could switch DIY Brick off.
+ * While bricked it also closes Settings screens that could switch Live Free off.
  */
 class BlockerService : AccessibilityService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -69,7 +69,7 @@ class BlockerService : AccessibilityService() {
     }
 
     /**
-     * While bricked, close Settings or uninstaller screens that could switch DIY Brick
+     * While bricked, close Settings or uninstaller screens that could switch Live Free
      * off. Screen text is only read here, for those packages, while bricked.
      */
     private fun guardSettings(packageName: String, force: Boolean) {
@@ -122,7 +122,7 @@ class BlockerService : AccessibilityService() {
         if (messages.shouldShow(packageName)) {
             // Some phones stop background services from opening screens; the toast still explains.
             val label = AppLabels.of(this, packageName)
-            Toast.makeText(this, "DIY Brick closed $label: your phone is bricked", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Live Free closed $label: your phone is bricked", Toast.LENGTH_LONG).show()
         }
 
         // If the app somehow ends up in front again without a new window event

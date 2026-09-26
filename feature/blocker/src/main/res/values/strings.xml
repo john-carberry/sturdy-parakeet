@@ -1,7 +1,7 @@
 <resources>
-    <string name="blocker_service_label">DIY Brick app blocker</string>
+    <string name="blocker_service_label">Live Free app blocker</string>
     <string name="blocker_service_description">Blocks the apps you chose while your phone is bricked. It sees which app is opening, and while you are bricked it reads Settings screens so it can stop the blocker being switched off. Nothing leaves your phone.</string>
-    <string name="admin_label">DIY Brick uninstall protection</string>
-    <string name="admin_description">Stops DIY Brick being uninstalled while your phone is bricked.</string>
-    <string name="admin_disable_warning">DIY Brick will no longer be protected from being uninstalled.</string>
+    <string name="admin_label">Live Free uninstall protection</string>
+    <string name="admin_description">Stops Live Free being uninstalled while your phone is bricked.</string>
+    <string name="admin_disable_warning">Live Free will no longer be protected from being uninstalled.</string>
 </resources>
