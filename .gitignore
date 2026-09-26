@@ -6,3 +6,6 @@ local.properties
 .DS_Store
 captures/
 .kotlin/
+
+# Local-only resource overrides for personal debug builds (never committed).
+app/src/debug/res/
