@@ -20,7 +20,7 @@ See [PLAN.md](PLAN.md) for the full design and milestones.
 Requires JDK 17+ and the Android SDK (API 35).
 
 ```sh
-./gradlew assembleDebug   # APK in app/build/outputs/apk/debug/
+./gradlew assembleDebug   # APKs in app/build/outputs/apk/debug/ (use arm64-v8a for most phones)
 ./gradlew test            # unit tests
 ```
 

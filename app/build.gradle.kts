@@ -34,6 +34,17 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // The bundled ML Kit scanner ships native code for every CPU type. Per-CPU APKs
+    // keep downloads small; the universal APK still works on any phone.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
+    }
 }
 
 dependencies {
